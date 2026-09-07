@@ -344,6 +344,27 @@ EOF
 
 # ---------- user ----------
 
+# Home kept from an Omarchy install: park configs that need Omarchy.
+stash_omarchy() {
+  if grep -qs omarchy "$HYPR_DIR/hyprland.lua"; then
+    log "Omarchy hypr config found, moving aside"
+    mv "$HYPR_DIR" "$HYPR_DIR.omarchy.$(date +%s)"
+  fi
+
+  if grep -qs 'default/bash/rc' "$HOME/.bashrc"; then
+    log "Omarchy bashrc found, moving to .bashrc.omarchy"
+    mv "$HOME/.bashrc" "$HOME/.bashrc.omarchy"
+    printf '%s\n' \
+      '[[ $- != *i* ]] && return' \
+      '[[ -f ~/.cargo/env ]] && . ~/.cargo/env' \
+      '[[ -f ~/.local/bin/env ]] && . ~/.local/bin/env' >"$HOME/.bashrc"
+  fi
+
+  # units from packages that no longer exist
+  rm -f "$HOME"/.config/systemd/user/omarchy-*
+  find "$HOME/.config/systemd/user" -xtype l -delete 2>/dev/null || true
+}
+
 setup_bashrc() {
   local rc="$HOME/.bashrc"
   if grep -q '# >>> postinstall' "$rc" 2>/dev/null; then
@@ -689,6 +710,7 @@ main() {
   install_gaming
   setup_snapshots
   setup_system
+  stash_omarchy
   setup_user
   write_noctalia_config
   write_hypr_config
