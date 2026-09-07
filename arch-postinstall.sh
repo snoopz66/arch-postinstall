@@ -245,6 +245,10 @@ install_apps() {
 }
 
 install_dropbox() {
+  # keyboxd lock survives a hard reboot; a reused PID makes gpg wait, then fail
+  gpgconf --kill all
+  rm -f "$HOME/.gnupg/public-keys.d/pubring.db.lock"
+
   # PKGBUILD verifies the Dropbox release signature
   gpg --keyserver keyserver.ubuntu.com --recv-keys "$DROPBOX_KEY"
   aur dropbox nautilus-dropbox
