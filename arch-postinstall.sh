@@ -2,7 +2,7 @@
 #
 # Arch post-install: NVIDIA, Hyprland (Lua), Noctalia v5, dev tools.
 # Run as your user after the first boot of an archinstall system.
-# Idempotent: safe to re-run.
+# Idempotent: safe to re-run. A non-empty ~/.config/hypr prompts for removal.
 #
 #   bash arch-postinstall.sh
 #
@@ -60,6 +60,21 @@ preflight() {
   (while true; do sudo -n true; sleep 50; done) &
   SUDO_PID=$!
   trap 'kill $SUDO_PID 2>/dev/null' EXIT
+}
+
+confirm_hypr_reset() {
+  if [[ ! -d $HYPR_DIR ]] || [[ -z $(ls -A "$HYPR_DIR") ]]; then
+    return
+  fi
+
+  local answer
+  read -rp "$HYPR_DIR is not empty. Remove it and write a fresh config? [y/N] " answer
+  if [[ $answer != [yY]* ]]; then
+    warn "keeping $HYPR_DIR, exiting"
+    exit 1
+  fi
+
+  rm -rf "$HYPR_DIR"
 }
 
 # ---------- system ----------
@@ -359,11 +374,6 @@ EOF
 
 # Home kept from an Omarchy install: park configs that need Omarchy.
 stash_omarchy() {
-  if grep -qs omarchy "$HYPR_DIR/hyprland.lua"; then
-    log "Omarchy hypr config found, moving aside"
-    mv "$HYPR_DIR" "$HYPR_DIR.omarchy.$(date +%s)"
-  fi
-
   if grep -qs 'default/bash/rc' "$HOME/.bashrc"; then
     log "Omarchy bashrc found, moving to .bashrc.omarchy"
     mv "$HOME/.bashrc" "$HOME/.bashrc.omarchy"
@@ -710,6 +720,7 @@ EOF
 
 main() {
   preflight
+  confirm_hypr_reset
   setup_pacman
   install_base
   install_yay
