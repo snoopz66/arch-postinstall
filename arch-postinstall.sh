@@ -314,6 +314,15 @@ KERNEL_CMDLINE[default]="$cmdline"
 MAX_SNAPSHOT_ENTRIES=5
 EOF
 
+  # archinstall leaves limine.conf beside the EFI app; limine-update manages /boot/limine.conf only
+  local conf
+  for conf in /boot/EFI/*/limine.conf /boot/limine/limine.conf; do
+    if [[ -f $conf ]]; then
+      sudo mv "$conf" /boot/limine.conf
+      break
+    fi
+  done
+
   if [[ ! -e /boot/limine.conf.pre-postinstall ]]; then
     sudo cp /boot/limine.conf /boot/limine.conf.pre-postinstall
   fi
