@@ -108,9 +108,19 @@ EOF
   sudo mkinitcpio -P
 }
 
+# https://wiki.archlinux.org/title/Professional_audio
 install_audio() {
-  log "PipeWire"
-  pac pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol playerctl
+  log "PipeWire, realtime audio"
+  pac pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol playerctl \
+    realtime-privileges rtkit alsa-utils qpwgraph
+
+  # rtprio 98, memlock unlimited, /dev/cpu_dma_latency
+  sudo usermod -aG realtime "$USER"
+
+  write_root /etc/sysctl.d/99-audio.conf <<'EOF'
+vm.swappiness = 10
+fs.inotify.max_user_watches = 600000
+EOF
 }
 
 install_network() {
@@ -297,6 +307,8 @@ setup_snapshots() {
 
   local cmdline
   cmdline=$(sed -E 's/\b(BOOT_IMAGE|initrd)=[^ ]* ?//g' /proc/cmdline)
+  # threadirqs: realtime audio
+  grep -qw threadirqs <<<"$cmdline" || cmdline+=" threadirqs"
   write_root /etc/limine-entry-tool.d/10-postinstall.conf <<EOF
 KERNEL_CMDLINE[default]="$cmdline"
 MAX_SNAPSHOT_ENTRIES=5
@@ -658,6 +670,7 @@ Done. Next:
        docker run --rm hello-world                     # after re-login
   5. Wifi: NetworkManager now drives iwd; reconnect from the bar if needed
   6. sudo tailscale up ; Dropbox asks to link on first start
+  7. Audio interface: pick the "Pro Audio" profile in pavucontrol for direct channels
 EOF
 }
 
