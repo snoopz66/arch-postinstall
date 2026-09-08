@@ -59,8 +59,8 @@ preflight() {
   command -v pacman >/dev/null || die "not Arch"
   command -v sudo >/dev/null || die "sudo missing"
   [[ -d $SRC_DIR/config ]] || die "config/ missing, run from a clone of the repo"
-  # /proc/cmdline, ufw and the AUR builds need the installed system
-  ! systemd-detect-virt -rq || die "chroot detected, boot the installed system first"
+  # /proc/cmdline, ufw and the AUR builds need the installed system, not the chroot
+  [[ -d /run/systemd/system ]] || die "systemd is not running, boot the installed system first"
 
   sudo -v
   (while true; do sudo -n true; sleep 50; done) &
