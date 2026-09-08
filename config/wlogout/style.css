@@ -1,0 +1,67 @@
+/* HyDE wlogout style 1: https://github.com/HyDE-Project/HyDE
+   ${fntSize} ${mgn} ${hvr} are filled in by ~/.local/bin/logoutmenu */
+* {
+  background-image: none;
+  font-size: ${fntSize}px;
+}
+
+@import "$HOME/.config/waybar/theme.css";
+
+window {
+  background-color: transparent;
+}
+
+button {
+  color: white;
+  background-color: @main-bg;
+  outline-style: none;
+  border: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 20%;
+  border-radius: 0px;
+  box-shadow: none;
+  text-shadow: none;
+  margin: ${mgn}px 0px;
+}
+
+button:focus {
+  background-color: @wb-act-bg;
+  background-size: 30%;
+}
+
+button:hover {
+  background-color: @wb-hvr-bg;
+  background-size: 40%;
+  border-radius: 50px;
+  margin: ${hvr}px 0px;
+  transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
+}
+
+#lock {
+  background-image: url("/usr/share/wlogout/icons/lock.png");
+  border-radius: 80px 0px 0px 80px;
+  margin-left: ${mgn}px;
+}
+
+#logout {
+  background-image: url("/usr/share/wlogout/icons/logout.png");
+}
+
+#suspend {
+  background-image: url("/usr/share/wlogout/icons/suspend.png");
+}
+
+#shutdown {
+  background-image: url("/usr/share/wlogout/icons/shutdown.png");
+}
+
+#reboot {
+  background-image: url("/usr/share/wlogout/icons/reboot.png");
+  border-radius: 0px 80px 80px 0px;
+  margin-right: ${mgn}px;
+}
+
+#lock:hover, #reboot:hover {
+  border-radius: 50px;
+}

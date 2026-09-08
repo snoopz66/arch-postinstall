@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# logoutmenu: wlogout in HyDE's layout, sized from the focused monitor
+set -euo pipefail
+
+if pkill -x wlogout; then
+  exit
+fi
+
+h=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .height / .scale | floor')
+export fntSize=$((h * 2 / 100)) mgn=$((h * 28 / 100)) hvr=$((h * 23 / 100))
+
+wlogout -b 5 -c 0 -r 0 -m 0 --protocol layer-shell \
+  --layout ~/.config/wlogout/layout \
+  --css <(envsubst <~/.config/wlogout/style.css)

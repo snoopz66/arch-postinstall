@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# wallpaper IMAGE: set wallpaper, regenerate colors, reload the shell
+set -euo pipefail
+
+img=$(realpath "$1")
+matugen image "$img" --prefer saturation
+
+hyprctl hyprpaper wallpaper ",$img"
+hyprctl reload
+pkill -SIGUSR2 waybar || true
+swaync-client -rs

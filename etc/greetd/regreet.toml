@@ -1,0 +1,17 @@
+# https://github.com/rharish101/ReGreet
+[background]
+path = "/usr/share/backgrounds/greeter.png"
+fit = "Cover"
+
+[GTK]
+application_prefer_dark_theme = true
+cursor_theme_name = "Bibata-Modern-Ice"
+font_name = "Cantarell 12"
+icon_theme_name = "Tela-circle-dracula"
+theme_name = "Adwaita-dark"
+
+[appearance]
+greeting_msg = "Welcome back!"
+
+[widget.clock]
+format = "%a %H:%M"

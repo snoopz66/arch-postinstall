@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# screenshot [region|screen]: grab, then annotate, copy or save in satty
+set -euo pipefail
+
+out="$HOME/Pictures/Screenshots/$(date +%Y%m%d-%H%M%S).png"
+mkdir -p "${out%/*}"
+
+case ${1:-region} in
+  region) grim -g "$(slurp)" - ;;
+  screen) grim - ;;
+esac | satty --filename - --output-filename "$out" --copy-command wl-copy --early-exit all

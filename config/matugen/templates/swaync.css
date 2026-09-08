@@ -1,0 +1,32 @@
+/* Default stylesheet, colors redefined, HyDE borders (wallbash/theme/swaync.dcol) */
+@import url("/etc/xdg/swaync/style.css");
+
+@define-color text-color {{colors.on_surface.default.hex}};
+@define-color text-color-disabled {{colors.outline.default.hex}};
+@define-color cc-bg alpha({{colors.surface.default.hex}}, 0.9);
+@define-color noti-bg {{colors.surface.default.hex}};
+@define-color noti-bg-opaque {{colors.surface_container.default.hex}};
+@define-color noti-bg-darker {{colors.surface_container_low.default.hex}};
+@define-color noti-bg-hover {{colors.surface_container_high.default.hex}};
+@define-color noti-bg-hover-opaque {{colors.surface_container_high.default.hex}};
+@define-color noti-bg-focus {{colors.surface_container_highest.default.hex}};
+@define-color noti-border-color {{colors.tertiary.default.hex}};
+@define-color noti-close-bg {{colors.surface_container_highest.default.hex}};
+@define-color noti-close-bg-hover {{colors.error_container.default.hex}};
+@define-color bg-selected {{colors.primary.default.hex}};
+
+* {
+  font-family: "Mononoki Nerd Font";
+}
+
+.control-center {
+  border-radius: 12px;
+  border: 2px solid {{colors.tertiary.default.hex}};
+  opacity: 0.9;
+}
+
+.notification-row .notification-background .notification {
+  border-radius: 12px;
+  border: 2px solid {{colors.tertiary.default.hex}};
+  opacity: 0.8;
+}

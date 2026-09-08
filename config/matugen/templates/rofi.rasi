@@ -1,0 +1,10 @@
+/* HyDE rofi colors (wallbash/theme/rofi.dcol) mapped to Material roles */
+* {
+  main-bg: #{{colors.surface.default.hex_stripped}}B3;
+  main-fg: #{{colors.primary_fixed.default.hex_stripped}}E6;
+  main-br: #{{colors.tertiary.default.hex_stripped}}E6;
+  main-ex: #{{colors.surface_container.default.hex_stripped}}E6;
+  select-bg: #{{colors.tertiary_fixed_dim.default.hex_stripped}}80;
+  select-fg: #{{colors.on_tertiary.default.hex_stripped}}E6;
+  wallpaper: url("{{image}}", height);
+}

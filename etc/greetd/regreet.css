@@ -1,0 +1,15 @@
+/* Translucent rounded card on the wallpaper, colors from the seed palette */
+frame.background {
+  background-color: alpha(#101417, 0.8);
+  border: 2px solid #cec0e8;
+  border-radius: 12px;
+}
+
+entry, button, dropdown > button {
+  border-radius: 8px;
+}
+
+button.suggested-action {
+  background: #cec0e8;
+  color: #352b4b;
+}

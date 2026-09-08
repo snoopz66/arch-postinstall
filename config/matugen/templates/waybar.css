@@ -1,0 +1,8 @@
+/* HyDE waybar colors (wallbash/theme/waybar.dcol) mapped to Material roles */
+@define-color bar-bg alpha({{colors.surface.default.hex}}, 0.01);
+@define-color main-bg alpha({{colors.surface.default.hex}}, 0.8);
+@define-color main-fg alpha({{colors.primary_fixed.default.hex}}, 0.8);
+@define-color wb-act-bg alpha({{colors.tertiary.default.hex}}, 0.4);
+@define-color wb-act-fg {{colors.tertiary_fixed.default.hex}};
+@define-color wb-hvr-bg alpha({{colors.secondary.default.hex}}, 0.4);
+@define-color wb-hvr-fg alpha({{colors.secondary_fixed.default.hex}}, 0.8);

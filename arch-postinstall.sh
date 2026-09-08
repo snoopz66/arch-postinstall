@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #
-# Arch post-install: NVIDIA, Hyprland (Lua), Noctalia v5, dev tools.
+# Arch post-install: NVIDIA, Hyprland (Lua), HyDE-styled shell, matugen, dev tools.
 # Run as your user after the first boot of an archinstall system.
 # Idempotent: safe to re-run. A non-empty ~/.config/hypr prompts for removal.
 #
-#   bash arch-postinstall.sh
+#   git clone https://github.com/snoopz66/arch-postinstall && bash arch-postinstall/arch-postinstall.sh
+#
+# config/ -> ~/.config, bin/ -> ~/.local/bin, etc/ -> /etc. Existing user files are kept.
 #
 # Toggles:
 #   INSTALL_GAMING=0   skip steam, gamemode, gamescope
 #   SETUP_SNAPSHOTS=0  skip snapper + limine snapshot boot entries
-#   SWITCH_TO_NM=0     keep systemd-networkd (Noctalia wifi widget wants NetworkManager)
+#   SWITCH_TO_NM=0     keep systemd-networkd (wifi then needs iwctl, not nmtui)
 #   NVIDIA_DOCKER=0    skip nvidia-container-toolkit
 
 set -euo pipefail
@@ -26,7 +28,7 @@ KB_LAYOUT="us,no"
 KB_OPTIONS="grp:caps_toggle"
 
 HYPR_DIR="$HOME/.config/hypr"
-NOCTALIA_DIR="$HOME/.config/noctalia"
+SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # ---------- helpers ----------
 
@@ -55,6 +57,7 @@ preflight() {
   [[ $EUID -ne 0 ]] || die "run as your user, not root"
   command -v pacman >/dev/null || die "not Arch"
   command -v sudo >/dev/null || die "sudo missing"
+  [[ -d $SRC_DIR/config ]] || die "config/ missing, run from a clone of the repo"
 
   sudo -v
   (while true; do sudo -n true; sleep 50; done) &
@@ -170,41 +173,36 @@ switch_network() {
 # https://wiki.hypr.land/useful-utilities/must-have/
 install_hyprland() {
   log "Hyprland and desktop plumbing"
-  pac hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk qt5-wayland qt6-wayland \
+  pac hyprland kitty xdg-desktop-portal-hyprland xdg-desktop-portal-gtk qt5-wayland qt6-wayland \
     polkit gnome-keyring libsecret seahorse hyprpicker wl-clipboard \
     upower power-profiles-daemon accountsservice \
     xdg-user-dirs udiskie gvfs gvfs-mtp \
-    noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols inter-font \
-    papirus-icon-theme adwaita-icon-theme gnome-themes-extra
+    noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-nerd-fonts-symbols \
+    ttf-jetbrains-mono-nerd ttf-cascadia-code-nerd ttf-mononoki-nerd cantarell-fonts \
+    tela-circle-icon-theme-dracula adwaita-icon-theme gnome-themes-extra
 
   svc_enable upower.service power-profiles-daemon.service accounts-daemon.service
   xdg-user-dirs-update
 }
 
-# https://docs.noctalia.dev/greeter/installation/
-install_noctalia() {
-  log "Noctalia shell and greeter"
-  pac noctalia greetd
-  aur noctalia-greeter
+# https://wiki.archlinux.org/title/Greetd
+install_greeter() {
+  log "greetd, regreet"
+  pac greetd greetd-regreet cage
 
   write_root /etc/greetd/config.toml <<'EOF'
 [terminal]
 vt = 1
 
 [default_session]
-command = "/usr/bin/noctalia-greeter-session"
+command = "dbus-run-session cage -s -mlast -d -- regreet"
 user = "greeter"
 EOF
 
-  sudo install -d /var/lib/noctalia-greeter
-  write_root /var/lib/noctalia-greeter/greeter.toml <<EOF
-[session]
-default = "Hyprland"
-
-[user]
-default = "$USER"
-EOF
-  sudo chown -R greeter:greeter /var/lib/noctalia-greeter
+  sudo install -Dm644 "$SRC_DIR/etc/greetd/regreet.toml" /etc/greetd/regreet.toml
+  sudo install -Dm644 "$SRC_DIR/etc/greetd/regreet.css" /etc/greetd/regreet.css
+  sudo install -Dm644 /usr/share/hypr/wall2.png /usr/share/backgrounds/greeter.png
+  sudo install -d -o greeter -g greeter /var/lib/regreet
 
   # unlock gnome-keyring at login
   if ! grep -q pam_gnome_keyring /etc/pam.d/greetd; then
@@ -222,6 +220,13 @@ EOF
   done
 
   svc_enable greetd.service
+}
+
+install_shell() {
+  log "shell components"
+  pac waybar rofi hyprlock hypridle hyprpaper hyprpolkitagent swaync swayosd cliphist \
+    grim slurp satty matugen blueman
+  aur wlogout bibata-cursor-theme-bin
 }
 
 install_dev() {
@@ -413,109 +418,44 @@ EOF
 
 setup_user() {
   log "user defaults"
-
-  write_user "$HOME/.config/environment.d/10-apps.conf" <<'EOF'
-TERMINAL=ghostty
-EDITOR=nvim
-EOF
-
-  write_user "$HOME/.config/xdg-terminals.list" <<'EOF'
-com.mitchellh.ghostty.desktop
-EOF
-
-  write_user "$HOME/.config/ghostty/config" <<'EOF'
-font-family = JetBrainsMono Nerd Font
-font-size = 10
-window-padding-x = 12
-window-padding-y = 12
-confirm-close-surface = false
-EOF
-
   xdg-settings set default-web-browser firefox.desktop 2>/dev/null || true
   xdg-mime default org.gnome.Nautilus.desktop inode/directory
   xdg-mime default org.gnome.Loupe.desktop image/png image/jpeg image/gif image/webp image/svg+xml image/avif
   xdg-mime default mpv.desktop video/mp4 video/x-matroska video/webm audio/mpeg audio/flac
   xdg-mime default org.gnome.Papers.desktop application/pdf
 
+  # HyDE defaults
   dbus-run-session -- sh -c "
-    gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+    gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-dracula'
+    gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-    gsettings set org.gnome.desktop.interface font-name 'Inter 11'
-    gsettings set org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 10'
+    gsettings set org.gnome.desktop.interface font-name 'Cantarell 10'
+    gsettings set org.gnome.desktop.interface monospace-font-name 'CaskaydiaCove Nerd Font Mono 9'
   " || warn "gsettings skipped"
 
   setup_bashrc
 }
 
-# https://docs.noctalia.dev/noctalia/configuration/shell/
-write_noctalia_config() {
-  log "Noctalia config"
-  write_user "$NOCTALIA_DIR/00-base.toml" <<'EOF'
-# Hand-written base. Settings UI (~/.local/state/noctalia/settings.toml) wins on conflict.
+# config/ -> ~/.config, bin/ -> ~/.local/bin; existing files win
+install_config() {
+  log "shell config"
+  cp -r --update=none "$SRC_DIR/config/." "$HOME/.config/"
+  install -d "$HOME/.local/bin"
+  cp --update=none "$SRC_DIR"/bin/* "$HOME/.local/bin/"
 
-[shell]
-polkit_agent = true
-telemetry_enabled = false
-
-[lockscreen]
-enabled = true
-lock_before_suspend = true
-
-[idle]
-behavior_order = ["lock", "screen-off"]
-
-[idle.behavior.lock]
-timeout = 600
-action = "lock"
-enabled = true
-
-[idle.behavior.screen-off]
-timeout = 900
-action = "screen_off"
-enabled = true
-EOF
+  # first palette; `wallpaper IMAGE` changes it later
+  matugen image /usr/share/hypr/wall2.png --prefer saturation
 }
 
-# https://wiki.hypr.land/configuring/core/
-# https://docs.noctalia.dev/noctalia/compositor-settings/hyprland/
-write_hypr_config() {
-  log "Hyprland Lua config"
-
-  write_user "$HYPR_DIR/hyprland.lua" <<'EOF'
--- Hyprland Lua config. Docs: https://wiki.hypr.land/configuring/core/
-require("env")
-require("monitors")
-require("input")
-require("looknfeel")
-require("rules")
-require("binds")
-require("autostart")
-EOF
-
-  write_user "$HYPR_DIR/env.lua" <<'EOF'
--- NVIDIA: https://wiki.hypr.land/nvidia/
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-hl.env("NVD_BACKEND", "direct")
-hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
-
--- Toolkits
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
-hl.env("QT_QPA_PLATFORM", "wayland;xcb")
-hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
-hl.env("MOZ_ENABLE_WAYLAND", "1")
-hl.env("XMODIFIERS", "@im=fcitx")
-
--- Default apps
-hl.env("TERMINAL", "ghostty")
-hl.env("EDITOR", "nvim")
-EOF
+# Machine-specific Hyprland files; the rest ships in config/hypr
+write_machine_config() {
+  log "monitor and keyboard"
 
   write_user "$HYPR_DIR/monitors.lua" <<EOF
 -- List outputs: hyprctl monitors all
-hl.monitor({ output = "$MONITOR", mode = "$MONITOR_MODE", position = "0x0", scale = 1 })
+MONITOR = "$MONITOR"
+hl.monitor({ output = MONITOR, mode = "$MONITOR_MODE", position = "0x0", scale = 1 })
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 EOF
 
@@ -530,175 +470,6 @@ hl.config({
   },
 })
 EOF
-
-  write_user "$HYPR_DIR/looknfeel.lua" <<'EOF'
--- Values from https://docs.noctalia.dev/noctalia/compositor-settings/hyprland/
-hl.config({
-  general = {
-    gaps_in = 5,
-    gaps_out = 10,
-    border_size = 2,
-    col = {
-      active_border = "rgba(89b4faee)",
-      inactive_border = "rgba(595959aa)",
-    },
-    layout = "dwindle",
-    resize_on_border = true,
-  },
-  decoration = {
-    rounding = 20,
-    rounding_power = 2,
-    shadow = { enabled = true, range = 4, render_power = 3, color = 0xee1a1a1a },
-    blur = { enabled = true, size = 3, passes = 2, vibrancy = 0.1696 },
-  },
-  dwindle = { preserve_split = true },
-  binds = { workspace_back_and_forth = true },
-  misc = {
-    disable_hyprland_logo = true,
-    force_default_wallpaper = 0,
-    middle_click_paste = false,
-  },
-})
-
--- Animations (Hyprland defaults)
-hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
-hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0.05 }, { 0.36, 1 } } })
-hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
-hl.curve("almostLinear", { type = "bezier", points = { { 0.5, 0.5 }, { 0.75, 1 } } })
-hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
-hl.curve("easy", { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
-
-hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
-hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windows", enabled = true, speed = 4.79, spring = "easy" })
-hl.animation({ leaf = "windowsIn", enabled = true, speed = 4.1, spring = "easy", style = "popin 87%" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.49, bezier = "linear", style = "popin 87%" })
-hl.animation({ leaf = "fadeIn", enabled = true, speed = 1.73, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeOut", enabled = true, speed = 1.46, bezier = "almostLinear" })
-hl.animation({ leaf = "fade", enabled = true, speed = 3.03, bezier = "quick" })
-hl.animation({ leaf = "layers", enabled = true, speed = 3.81, bezier = "easeOutQuint" })
-hl.animation({ leaf = "layersIn", enabled = true, speed = 4, bezier = "easeOutQuint", style = "fade" })
-hl.animation({ leaf = "layersOut", enabled = true, speed = 1.5, bezier = "linear", style = "fade" })
-hl.animation({ leaf = "fadeLayersIn", enabled = true, speed = 1.79, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.39, bezier = "almostLinear" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
-EOF
-
-  write_user "$HYPR_DIR/rules.lua" <<EOF
--- Noctalia layers: blur, and no Hyprland layer animation
-hl.layer_rule({
-  name = "noctalia",
-  match = { namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$" },
-  no_anim = true,
-  ignore_alpha = 0.5,
-  blur = true,
-  blur_popups = true,
-})
-
-hl.window_rule({
-  name = "noctalia-settings",
-  match = { class = "dev.noctalia.Noctalia" },
-  float = true,
-  size = { 1080, 920 },
-})
-
-hl.window_rule({
-  name = "suppress-maximize",
-  match = { class = ".*" },
-  suppress_event = "maximize",
-})
-
-hl.window_rule({
-  name = "fix-xwayland-drags",
-  match = { class = "^$", title = "^$", xwayland = true, float = true, fullscreen = false, pin = false },
-  no_focus = true,
-})
-
--- Persistent workspaces keep Noctalia's indicator stable
-for i = 1, 5 do
-  hl.workspace_rule({ workspace = tostring(i), monitor = "$MONITOR", persistent = true })
-end
-EOF
-
-  write_user "$HYPR_DIR/binds.lua" <<'EOF'
-local mod = "SUPER"
-local ipc = "noctalia msg "
-local terminal = "ghostty"
-local files = "nautilus --new-window"
-local browser = "firefox"
-
--- Noctalia
-hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd(ipc .. "panel-toggle launcher"))
-hl.bind(mod .. " + S", hl.dsp.exec_cmd(ipc .. "panel-toggle control-center"))
-hl.bind(mod .. " + comma", hl.dsp.exec_cmd(ipc .. "settings-toggle"))
-hl.bind(mod .. " + V", hl.dsp.exec_cmd(ipc .. "panel-toggle clipboard"))
-hl.bind(mod .. " + ESCAPE", hl.dsp.exec_cmd(ipc .. "panel-toggle session"))
-hl.bind(mod .. " + L", hl.dsp.exec_cmd(ipc .. "session lock"))
-hl.bind("ALT + TAB", hl.dsp.exec_cmd(ipc .. "window-switcher"))
-hl.bind("PRINT", hl.dsp.exec_cmd(ipc .. "screenshot-region"))
-hl.bind("SHIFT + PRINT", hl.dsp.exec_cmd(ipc .. "screenshot-fullscreen"))
-
--- Media keys (Noctalia draws the OSD)
-local held = { locked = true, repeating = true }
-local once = { locked = true }
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(ipc .. "volume-up"), held)
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(ipc .. "volume-down"), held)
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd(ipc .. "volume-mute"), once)
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(ipc .. "mic-mute"), once)
-hl.bind("XF86AudioPlay", hl.dsp.exec_cmd(ipc .. "media toggle"), once)
-hl.bind("XF86AudioNext", hl.dsp.exec_cmd(ipc .. "media next"), once)
-hl.bind("XF86AudioPrev", hl.dsp.exec_cmd(ipc .. "media previous"), once)
-
--- Apps
-hl.bind(mod .. " + RETURN", hl.dsp.exec_cmd(terminal))
-hl.bind(mod .. " + E", hl.dsp.exec_cmd(files))
-hl.bind(mod .. " + B", hl.dsp.exec_cmd(browser))
-
--- Windows
-hl.bind(mod .. " + Q", hl.dsp.window.close())
-hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
-hl.bind(mod .. " + ALT + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
-hl.bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"))
-hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
-hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
-
-local dirs = { left = "l", right = "r", up = "u", down = "d" }
-for key, dir in pairs(dirs) do
-  hl.bind(mod .. " + " .. key, hl.dsp.focus({ direction = dir }))
-  hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.swap({ direction = dir }))
-end
-
-local grow = { repeating = true }
-hl.bind(mod .. " + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), grow)
-hl.bind(mod .. " + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), grow)
-hl.bind(mod .. " + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), grow)
-hl.bind(mod .. " + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), grow)
-
--- Workspaces
-for i = 1, 10 do
-  local key = i % 10
-  hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-  hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
-end
-
-hl.bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }))
-hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mod .. " + grave", hl.dsp.workspace.toggle_special("scratch"))
-hl.bind(mod .. " + SHIFT + grave", hl.dsp.window.move({ workspace = "special:scratch" }))
-EOF
-
-  write_user "$HYPR_DIR/autostart.lua" <<'EOF'
-hl.on("hyprland.start", function()
-  hl.exec_cmd("noctalia")
-  hl.exec_cmd("udiskie --no-notify --no-tray")
-  hl.exec_cmd("fcitx5 -d")
-  hl.exec_cmd("dropbox")
-end)
-EOF
 }
 
 summary() {
@@ -706,15 +477,16 @@ summary() {
 
 Done. Next:
   1. sudo reboot
-  2. Noctalia greeter -> session "Hyprland"
-  3. SUPER+SPACE launcher, SUPER+comma Noctalia settings, SUPER+RETURN ghostty
+  2. regreet -> Hyprland
+  3. SUPER+SPACE launcher, SUPER+ESCAPE power menu, SUPER+V clipboard, PRINT screenshot
   4. Verify:
        cat /sys/module/nvidia_drm/parameters/modeset   # Y
        snapper list && limine-snapper-list
        docker run --rm hello-world                     # after re-login
-  5. Wifi: NetworkManager now drives iwd; reconnect from the bar if needed
+  5. Wifi: NetworkManager now drives iwd; reconnect with nmtui if needed
   6. sudo tailscale up ; Dropbox asks to link on first start
   7. Audio interface: pick the "Pro Audio" profile in pavucontrol for direct channels
+  8. Wallpaper and colors: wallpaper ~/Pictures/some.jpg
 EOF
 }
 
@@ -728,7 +500,8 @@ main() {
   install_audio
   install_network
   install_hyprland
-  install_noctalia
+  install_greeter
+  install_shell
   install_dev
   install_apps
   install_gaming
@@ -736,8 +509,8 @@ main() {
   setup_system
   stash_omarchy
   setup_user
-  write_noctalia_config
-  write_hypr_config
+  install_config
+  write_machine_config
   switch_network
   summary
 }

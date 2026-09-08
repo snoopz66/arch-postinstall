@@ -1,0 +1,103 @@
+/* HyDE island style, trimmed: https://github.com/HyDE-Project/HyDE (waybar/styles/defaults.css) */
+@import "theme.css";
+
+* {
+  border-radius: 0em;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: @bar-bg;
+}
+
+.module {
+  color: @main-fg;
+}
+
+.modules-left, .modules-center, .modules-right {
+  padding: 0 0.3em;
+  margin: 0 0.3em;
+}
+
+label.module {
+  padding: 0 0.2em;
+  margin: 0 0.2em;
+}
+
+/* islands */
+#leaf, #leaf-inverse, #pill-in {
+  background-color: @main-bg;
+  padding: 0em 1em;
+  margin: 0.3em 1em 0.3em 0em;
+}
+
+#leaf, #leaf button {
+  border-radius: 10pt 0 10pt 0;
+}
+
+#leaf-inverse, #leaf-inverse button {
+  border-radius: 0 10pt 0 10pt;
+}
+
+#pill-in, #pill-in button {
+  border-radius: 0 0 10pt 10pt;
+}
+
+#pill-in {
+  margin-top: 0em;
+}
+
+/* workspaces */
+button {
+  margin: 0.41em 0.11em;
+  border: 0em;
+}
+
+#workspaces button {
+  box-shadow: none;
+  text-shadow: none;
+  padding: 0 0.3em;
+  margin: 0.3em 0;
+  color: @main-fg;
+}
+
+#workspaces button.active {
+  background: @wb-act-bg;
+  color: @wb-act-fg;
+  padding: 0 1.2em;
+  margin: 0.3em;
+  transition: all 0.4s cubic-bezier(.55, -0.68, .48, 1.682);
+}
+
+#workspaces button:hover {
+  background: @wb-hvr-bg;
+  color: @wb-hvr-fg;
+  transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+}
+
+/* popups */
+tooltip {
+  background: @main-bg;
+  color: @main-fg;
+  border: 0.1em solid @main-fg;
+}
+
+tooltip * {
+  background: transparent;
+  border: none;
+}
+
+menu {
+  background-color: @main-bg;
+}
+
+menu menuitem:hover {
+  background-color: @wb-act-bg;
+  color: @wb-act-fg;
+}
+
+#tray menu * {
+  min-height: 1.6em;
+}

@@ -1,0 +1,27 @@
+# Material colors from the wallpaper, rendered into every shell config.
+# https://github.com/InioX/matugen/wiki/Configuration
+[config]
+
+[templates.hyprland]
+input_path = "~/.config/matugen/templates/hyprland.lua"
+output_path = "~/.config/hypr/colors.lua"
+
+[templates.hyprlock]
+input_path = "~/.config/matugen/templates/hyprlock.conf"
+output_path = "~/.config/hypr/colors-hyprlock.conf"
+
+[templates.hyprpaper]
+input_path = "~/.config/matugen/templates/hyprpaper.conf"
+output_path = "~/.config/hypr/hyprpaper.conf"
+
+[templates.waybar]
+input_path = "~/.config/matugen/templates/waybar.css"
+output_path = "~/.config/waybar/theme.css"
+
+[templates.rofi]
+input_path = "~/.config/matugen/templates/rofi.rasi"
+output_path = "~/.config/rofi/theme.rasi"
+
+[templates.swaync]
+input_path = "~/.config/matugen/templates/swaync.css"
+output_path = "~/.config/swaync/style.css"
