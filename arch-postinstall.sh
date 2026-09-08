@@ -3,6 +3,7 @@
 # Arch post-install: NVIDIA, Hyprland (Lua), HyDE-styled shell, matugen, dev tools.
 # Run as your user after the first boot of an archinstall system.
 # Idempotent: safe to re-run. A non-empty ~/.config/hypr prompts for removal.
+# Not from the archinstall chroot: it reads /proc/cmdline and enables ufw.
 #
 #   git clone https://github.com/snoopz66/arch-postinstall && bash arch-postinstall/arch-postinstall.sh
 #
@@ -58,6 +59,8 @@ preflight() {
   command -v pacman >/dev/null || die "not Arch"
   command -v sudo >/dev/null || die "sudo missing"
   [[ -d $SRC_DIR/config ]] || die "config/ missing, run from a clone of the repo"
+  # /proc/cmdline, ufw and the AUR builds need the installed system
+  ! systemd-detect-virt -rq || die "chroot detected, boot the installed system first"
 
   sudo -v
   (while true; do sudo -n true; sleep 50; done) &
@@ -321,7 +324,12 @@ setup_snapshots() {
 
   log "snapper, snap-pac, limine snapshot entries"
   pac snapper snap-pac
-  aur limine-mkinitcpio-hook limine-snapper-sync
+
+  # gradle + GraalVM native builds: slow, RAM hungry, break now and then
+  if ! aur limine-mkinitcpio-hook limine-snapper-sync; then
+    warn "limine tools failed to build; rerun later for snapshot boot entries"
+    return
+  fi
 
   create_snapper_root
   sudo snapper -c root set-config \
@@ -505,12 +513,12 @@ main() {
   install_dev
   install_apps
   install_gaming
-  setup_snapshots
   setup_system
   stash_omarchy
   setup_user
   install_config
   write_machine_config
+  setup_snapshots
   switch_network
   summary
 }
