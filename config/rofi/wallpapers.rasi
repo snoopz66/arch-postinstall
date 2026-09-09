@@ -1,0 +1,73 @@
+/* Wallpaper picker: one row of square thumbnails (HyDE selector.rasi), the window sized by wallpapermenu */
+configuration {
+  show-icons: true;
+}
+
+@theme "theme"
+
+window {
+  transparency: "real";
+  border: 2px;
+  border-radius: 30px;
+  border-color: @main-br;
+  background-color: @main-bg;
+  padding: 0em;
+}
+
+mainbox {
+  orientation: horizontal;
+  children: [ "dummy", "listview", "dummy" ];
+  background-color: transparent;
+}
+
+dummy {
+  width: 2em;
+  expand: false;
+  background-color: transparent;
+}
+
+listview {
+  columns: 6;
+  lines: 1;
+  cycle: true;
+  dynamic: false;
+  scrollbar: false;
+  fixed-height: false;
+  fixed-columns: true;
+  spacing: 3em;
+  padding: 3em;
+  background-color: transparent;
+  text-color: @main-fg;
+}
+
+element {
+  orientation: vertical;
+  spacing: 0.6em;
+  padding: 0.8em;
+  border-radius: 20px;
+  cursor: pointer;
+  background-color: transparent;
+  text-color: @main-fg;
+}
+
+element selected.normal {
+  background-color: @select-bg;
+  text-color: @select-fg;
+}
+
+element-icon {
+  size: 18em;
+  border-radius: 20px;
+  expand: false;
+  cursor: inherit;
+  background-color: transparent;
+  text-color: inherit;
+}
+
+element-text {
+  vertical-align: 0.5;
+  horizontal-align: 0.5;
+  cursor: inherit;
+  background-color: transparent;
+  text-color: inherit;
+}

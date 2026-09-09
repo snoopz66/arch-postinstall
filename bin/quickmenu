@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# quickmenu: SUPER+ALT+SPACE, a few actions in the launcher's style
+set -euo pipefail
+
+if pkill -x rofi; then
+  exit
+fi
+
+choice=$(printf '%s\n' $'  Wallpaper' $'  Screenshot' $'  Keybinds' |
+  rofi -dmenu -i -no-custom -theme menu) || exit 0
+
+case $choice in
+  *Wallpaper) exec ~/.local/bin/wallpapermenu ;;
+  *Screenshot) exec ~/.local/bin/screenshot region ;;
+  *Keybinds) exec ~/.local/bin/keybinds ;;
+esac

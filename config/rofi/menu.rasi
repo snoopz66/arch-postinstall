@@ -1,0 +1,81 @@
+/* Small action lists in the launcher's style, without the sidebar: quickmenu, keybinds */
+configuration {
+  show-icons: true;
+}
+
+@theme "theme"
+
+window {
+  width: 30em;
+  transparency: "real";
+  border: 2px;
+  border-radius: 30px;
+  border-color: @main-br;
+  background-color: @main-bg;
+  padding: 1em;
+}
+
+mainbox {
+  spacing: 0.6em;
+  padding: 0em;
+  orientation: vertical;
+  children: [ "inputbar", "listview" ];
+  background-color: transparent;
+}
+
+inputbar {
+  children: [ "entry" ];
+  spacing: 0.8em;
+  padding: 0.6em 1.2em;
+  border-radius: 20px;
+  background-color: @main-ex;
+  text-color: @main-fg;
+}
+
+entry {
+  placeholder: "Search";
+  placeholder-color: @main-fg;
+  cursor: text;
+  background-color: transparent;
+  text-color: inherit;
+}
+
+listview {
+  columns: 1;
+  lines: 8;
+  cycle: true;
+  dynamic: true;
+  scrollbar: false;
+  fixed-height: false;
+  spacing: 0.2em;
+  background-color: transparent;
+  text-color: @main-fg;
+}
+
+element {
+  spacing: 0.8em;
+  padding: 0.5em 1em;
+  border-radius: 20px;
+  cursor: pointer;
+  background-color: transparent;
+  text-color: @main-fg;
+}
+
+element selected.normal {
+  background-color: @select-bg;
+  text-color: @select-fg;
+}
+
+element-icon {
+  size: 1.6em;
+  cursor: inherit;
+  background-color: transparent;
+  text-color: inherit;
+}
+
+element-text {
+  vertical-align: 0.5;
+  cursor: inherit;
+  background-color: transparent;
+  text-color: inherit;
+}

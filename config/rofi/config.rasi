@@ -1,10 +1,11 @@
-/* HyDE launcher style 1 (sidebar over the wallpaper): https://github.com/HyDE-Project/HyDE */
+/* HyDE launcher style 1 (sidebar over the wallpaper): https://github.com/HyDE-Project/HyDE
+   The sidebar images in ~/.cache/wallpaper are written by ~/.local/bin/wallpaper */
 configuration {
   modes: "drun,window,run";
   show-icons: true;
-  display-drun: " ";
-  display-run: " ";
-  display-window: " ";
+  display-drun: " ";
+  display-run: " ";
+  display-window: " ";
   drun-display-format: "{name}";
   window-format: "{w}{t}";
   font: "JetBrainsMono Nerd Font 10";
@@ -40,7 +41,7 @@ dummywall {
   orientation: horizontal;
   children: [ "mode-switcher", "inputbar" ];
   background-color: transparent;
-  background-image: @wallpaper;
+  background-image: url("~/.cache/wallpaper/rofi.png", height);
 }
 
 mode-switcher {
@@ -48,7 +49,8 @@ mode-switcher {
   width: 3.8em;
   padding: 9.2em 0.5em;
   spacing: 1.2em;
-  background-color: @main-ex;
+  background-color: transparent;
+  background-image: url("~/.cache/wallpaper/rofi-blur.png", height);
 }
 
 button {
@@ -84,6 +86,7 @@ listview {
   cycle: true;
   dynamic: true;
   scrollbar: false;
+  expand: false;
   fixed-height: true;
   background-color: transparent;
   text-color: @main-fg;
@@ -108,7 +111,7 @@ element selected.normal {
 }
 
 element-icon {
-  size: 2.8em;
+  size: 2.2em; /* HyDE has 2.8em; eight of those overflow the window and eat the top margin */
   cursor: inherit;
   background-color: transparent;
   text-color: inherit;

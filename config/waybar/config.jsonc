@@ -1,21 +1,26 @@
-// HyDE islands (leaf, pill-in, leaf): https://github.com/HyDE-Project/HyDE
+// HyDE islands, all full pills (styles/groups/pill.css): https://github.com/HyDE-Project/HyDE
 {
   "layer": "top",
   "position": "top",
   "mode": "dock",
   "exclusive": true,
   "reload_style_on_change": true,
-  "modules-left": ["group/leaf-inverse"],
-  "modules-center": ["group/pill-in"],
-  "modules-right": ["group/leaf"],
+  "modules-left": ["group/pill-left"],
+  "modules-center": ["group/pill-center"],
+  "modules-right": ["group/pill-right"],
 
-  "group/leaf-inverse": { "orientation": "inherit", "modules": ["hyprland/window"] },
-  "group/pill-in": { "orientation": "inherit", "modules": ["hyprland/workspaces"] },
-  "group/leaf": {
+  "group/pill-left": { "orientation": "inherit", "modules": ["custom/power", "hyprland/window"] },
+  "group/pill-center": { "orientation": "inherit", "modules": ["hyprland/workspaces"] },
+  "group/pill-right": {
     "orientation": "inherit",
     "modules": ["privacy", "tray", "hyprland/language", "bluetooth", "pulseaudio", "network", "custom/notification", "clock"]
   },
 
+  "custom/power": {
+    "format": "\uf011",
+    "tooltip-format": "Power menu",
+    "on-click": "~/.local/bin/logoutmenu"
+  },
   "hyprland/window": {
     "format": "  {0}",
     "max-length": 50,
@@ -44,7 +49,7 @@
     "on-click": "blueman-manager"
   },
   "pulseaudio": {
-    "format": "{icon} {volume}",
+    "format": "{icon}  {volume}",
     "format-muted": "󰝟",
     "scroll-step": 5,
     "on-click": "pavucontrol -t 3",
@@ -53,17 +58,17 @@
     "on-scroll-down": "swayosd-client --output-volume lower",
     "tooltip-format": "{icon} {desc} // {volume}%",
     "format-icons": {
-      "headphone": "",
-      "hands-free": "",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["", "", ""]
+      "headphone": "\uf025",
+      "hands-free": "\uf025",
+      "headset": "\uf025",
+      "phone": "\uf095",
+      "portable": "\uf095",
+      "car": "\uf1b9",
+      "default": ["\uf026", "\uf027", "\uf028"]
     }
   },
   "network": {
-    "format-wifi": " ",
+    "format-wifi": "\uf1eb ",
     "format-ethernet": "󰈀 ",
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰖪 ",
@@ -91,7 +96,7 @@
     "escape": true
   },
   "clock": {
-    "format": "{:%H:%M  󰃭 %a %d %b}",
+    "format": "󰃭 {:%a %d %b   %H:%M}",
     "tooltip-format": "<span>{calendar}</span>",
     "calendar": {
       "mode": "month",

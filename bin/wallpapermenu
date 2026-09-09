@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# wallpapermenu: pick from thumbnails of ~/Pictures/Wallpapers and the stock walls, then `wallpaper` it
+set -euo pipefail
+
+dirs=("$HOME/Pictures/Wallpapers" /usr/share/hypr)
+thumbs=$HOME/.cache/wallpaper/thumbs
+mkdir -p "$thumbs" "${dirs[0]}"
+
+declare -A path
+names=()
+while IFS= read -r img; do
+  name=$(basename "${img%.*}")
+  thumb=$thumbs/$(md5sum <<<"$img" | cut -c1-32).png
+  # square crop, HyDE's wall.sqre
+  [[ -f $thumb ]] || magick "$img[0]" -strip -thumbnail 500x500^ -gravity center -extent 500x500 "$thumb"
+  path[$name]=$img
+  names+=("$name")
+done < <(find "${dirs[@]}" -maxdepth 1 -type f \
+  \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) ! -name 'lockdead*' | sort)
+
+# one row, as many columns as fit the focused monitor; an 18em thumbnail with its padding and spacing is 22.6em,
+# the window adds 10em, and rofi's em is about 18px at font 10
+w=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .width / .scale | floor')
+cols=$(((w / 18 - 10) * 10 / 226))
+((cols > ${#names[@]})) && cols=${#names[@]}
+width=$((cols * 226 / 10 + 10))
+
+# rofi's row format is NAME NUL "icon" US PATH; bash strings cannot hold NUL, so print rows straight to it
+rows() {
+  local name
+  for name in "${names[@]}"; do
+    printf '%s\0icon\x1f%s\n' "$name" "$thumbs/$(md5sum <<<"${path[$name]}" | cut -c1-32).png"
+  done
+}
+
+choice=$(rows | rofi -dmenu -i -no-custom -p "Wallpaper" -theme wallpapers \
+  -theme-str "window { width: ${width}em; } listview { columns: $cols; }") || exit 0
+
+exec ~/.local/bin/wallpaper "${path[$choice]}"

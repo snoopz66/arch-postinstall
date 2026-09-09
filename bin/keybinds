@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# keybinds: every Hyprland bind that has a desc, as a searchable list
+set -euo pipefail
+
+hyprctl binds -j | jq -r '
+  .[] | select(.has_description) |
+  ([ (if (.modmask / 64 | floor) % 2 == 1 then "SUPER" else empty end),
+     (if (.modmask / 4 | floor) % 2 == 1 then "CTRL" else empty end),
+     (if (.modmask / 8 | floor) % 2 == 1 then "ALT" else empty end),
+     (if .modmask % 2 == 1 then "SHIFT" else empty end),
+     .key ] | join(" + ")) + "\t" + .description' |
+  sed 's/mouse:272/LMB/; s/mouse:273/RMB/; s/mouse_down/scroll down/; s/mouse_up/scroll up/; s/XF86Audio//' |
+  awk -F'\t' '{ printf "%-24s %s\n", $1, $2 }' |
+  rofi -dmenu -i -no-custom -no-show-icons -p "Keys" -theme menu \
+    -theme-str 'window { width: 44em; } listview { lines: 18; } entry { placeholder: "Search keybinds"; }' >/dev/null || true

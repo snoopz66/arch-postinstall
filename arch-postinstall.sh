@@ -228,7 +228,7 @@ EOF
 install_shell() {
   log "shell components"
   pac waybar rofi hyprlock hypridle hyprpaper hyprpolkitagent swaync swayosd cliphist \
-    grim slurp satty matugen blueman
+    grim slurp satty matugen imagemagick blueman
   aur wlogout bibata-cursor-theme-bin
 }
 
@@ -381,6 +381,8 @@ EOF
   sudo ufw allow 53317/udp comment localsend
   sudo ufw allow in on tailscale0
   sudo ufw --force enable
+  # `ufw enable` loads the rules now; only the unit reloads them at boot
+  svc_enable ufw.service
 }
 
 # ---------- user ----------
@@ -452,8 +454,8 @@ install_config() {
   install -d "$HOME/.local/bin"
   cp --update=none "$SRC_DIR"/bin/* "$HOME/.local/bin/"
 
-  # first palette; `wallpaper IMAGE` changes it later
-  matugen image /usr/share/hypr/wall2.png --prefer saturation
+  # first palette and rofi sidebar images; `wallpaper IMAGE` changes them later
+  "$HOME/.local/bin/wallpaper" /usr/share/hypr/wall2.png
 }
 
 # Machine-specific Hyprland files; the rest ships in config/hypr
@@ -488,7 +490,7 @@ Done. Next:
   2. regreet -> Hyprland
   3. SUPER+SPACE launcher, SUPER+ESCAPE power menu, SUPER+V clipboard, PRINT screenshot
   4. Verify:
-       cat /sys/module/nvidia_drm/parameters/modeset   # Y
+       sudo cat /sys/module/nvidia_drm/parameters/modeset   # Y
        snapper list && limine-snapper-list
        docker run --rm hello-world                     # after re-login
   5. Wifi: NetworkManager now drives iwd; reconnect with nmtui if needed
