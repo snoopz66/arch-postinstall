@@ -13,3 +13,5 @@ Layout: `config/` → `~/.config`, `bin/` → `~/.local/bin`, `etc/` → `/etc`.
 Toggles: `INSTALL_GAMING=0 SETUP_SNAPSHOTS=0 SWITCH_TO_NM=0 NVIDIA_DOCKER=0`.
 
 Change wallpaper and colours: `wallpaper ~/Pictures/some.jpg`.
+
+The login screen (regreet inside Hyprland) mirrors the session: `greeter-sync` copies the wallpaper, colours and monitor layout into `/var/lib/greeter` whenever the wallpaper changes, Hyprland reloads its config or a monitor is (un)plugged.

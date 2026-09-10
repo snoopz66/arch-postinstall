@@ -1,0 +1,15 @@
+/* Login screen: translucent rounded card on the wallpaper, colors from the wallpaper like hyprlock */
+frame.background {
+  background-color: alpha({{colors.surface.default.hex}}, 0.8);
+  border: 2px solid {{colors.tertiary.default.hex}};
+  border-radius: 12px;
+}
+
+entry, button, dropdown > button {
+  border-radius: 8px;
+}
+
+button.suggested-action {
+  background: {{colors.tertiary.default.hex}};
+  color: {{colors.on_tertiary.default.hex}};
+}

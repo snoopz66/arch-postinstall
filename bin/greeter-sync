@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# greeter-sync: give the login screen the session's wallpaper and monitor layout
+# The greeter runs regreet inside Hyprland (/etc/greetd/hyprland.lua), which loads /var/lib/greeter/monitors.lua;
+# regreet takes its background and CSS from the same directory. `wallpaper` and the Hyprland hooks in
+# autostart.lua call this, matugen renders regreet.css there directly.
+set -euo pipefail
+
+dir=/var/lib/greeter
+[[ -w $dir ]] || exit 0
+
+# the greeter user cannot read $HOME, so it gets a copy; skipped when unchanged
+current=$HOME/.cache/wallpaper/current
+if [[ -f $current ]] && ! cmp -s "$current" "$dir/wallpaper"; then
+  cp -L "$current" "$dir/wallpaper.new"
+  chmod 644 "$dir/wallpaper.new"
+  mv "$dir/wallpaper.new" "$dir/wallpaper"
+fi
+
+# outside a session (first run from the install script) the layout comes from write_machine_config
+[[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || exit 0
+
+# let monitor rules settle after a reload before reading them back
+sleep 1
+{
+  echo "-- written by greeter-sync from \`hyprctl monitors all\`, do not edit"
+  hyprctl monitors all -j | jq -r '.[] |
+    if .disabled then
+      "hl.monitor({ output = \"\(.name)\", disabled = true })"
+    else
+      "hl.monitor({ output = \"\(.name)\", mode = \"\(.width)x\(.height)@\(.refreshRate * 100 | round / 100)\", position = \"\(.x)x\(.y)\", scale = \(.scale), transform = \(.transform) })"
+    end'
+  echo 'hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })'
+} > "$dir/monitors.lua.new"
+mv "$dir/monitors.lua.new" "$dir/monitors.lua"

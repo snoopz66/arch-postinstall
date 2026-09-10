@@ -191,21 +191,25 @@ install_hyprland() {
 # https://wiki.archlinux.org/title/Greetd
 install_greeter() {
   log "greetd, regreet"
-  pac greetd greetd-regreet cage
+  pac greetd greetd-regreet
 
+  # regreet runs inside Hyprland, not cage: cage cannot set a mode and shows the EDID-preferred one
+  # (3840x1080 on the C49RG9x). The session mirrors its layout, wallpaper and colors into
+  # /var/lib/greeter with greeter-sync, so that directory belongs to the user and is world-readable.
   write_root /etc/greetd/config.toml <<'EOF'
 [terminal]
 vt = 1
 
 [default_session]
-command = "dbus-run-session cage -s -mlast -d -- regreet"
+command = "dbus-run-session start-hyprland -- -c /etc/greetd/hyprland.lua"
 user = "greeter"
 EOF
 
   sudo install -Dm644 "$SRC_DIR/etc/greetd/regreet.toml" /etc/greetd/regreet.toml
-  sudo install -Dm644 "$SRC_DIR/etc/greetd/regreet.css" /etc/greetd/regreet.css
-  sudo install -Dm644 /usr/share/hypr/wall2.png /usr/share/backgrounds/greeter.png
+  sudo install -Dm644 "$SRC_DIR/etc/greetd/hyprland.lua" /etc/greetd/hyprland.lua
   sudo install -d -o greeter -g greeter /var/lib/regreet
+  sudo install -d -o "$USER" -g "$USER" -m 755 /var/lib/greeter
+  sudo rm -f /usr/share/backgrounds/greeter.png
 
   # unlock gnome-keyring at login
   if ! grep -q pam_gnome_keyring /etc/pam.d/greetd; then
@@ -404,6 +408,18 @@ stash_omarchy() {
 }
 
 setup_bashrc() {
+  # login shells only: greetd starts Hyprland through one, so the session and everything it spawns
+  # (terminals, Claude Code's non-interactive shell) see ~/.local/bin; .bashrc exits early when not interactive
+  local profile="$HOME/.bash_profile"
+  if ! grep -q '# >>> postinstall' "$profile" 2>/dev/null; then
+    cat >>"$profile" <<'EOF'
+
+# >>> postinstall >>>
+export PATH="$HOME/.local/bin:$PATH"
+# <<< postinstall <<<
+EOF
+  fi
+
   local rc="$HOME/.bashrc"
   if grep -q '# >>> postinstall' "$rc" 2>/dev/null; then
     return
@@ -468,6 +484,9 @@ MONITOR = "$MONITOR"
 hl.monitor({ output = MONITOR, mode = "$MONITOR_MODE", position = "0x0", scale = 1 })
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 EOF
+
+  # the login screen's copy until the first session runs greeter-sync
+  install -Dm644 "$HYPR_DIR/monitors.lua" /var/lib/greeter/monitors.lua
 
   write_user "$HYPR_DIR/input.lua" <<EOF
 hl.config({

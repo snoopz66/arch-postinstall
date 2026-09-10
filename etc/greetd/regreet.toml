@@ -1,6 +1,7 @@
 # https://github.com/rharish101/ReGreet
+# background and CSS come from greeter-sync/matugen in the session, see bin/greeter-sync
 [background]
-path = "/usr/share/backgrounds/greeter.png"
+path = "/var/lib/greeter/wallpaper"
 fit = "Cover"
 
 [GTK]

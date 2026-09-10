@@ -25,3 +25,8 @@ output_path = "~/.config/rofi/theme.rasi"
 [templates.swaync]
 input_path = "~/.config/matugen/templates/swaync.css"
 output_path = "~/.config/swaync/style.css"
+
+# the login screen; /var/lib/greeter is created by arch-postinstall.sh, see bin/greeter-sync
+[templates.regreet]
+input_path = "~/.config/matugen/templates/regreet.css"
+output_path = "/var/lib/greeter/regreet.css"

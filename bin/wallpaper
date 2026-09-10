@@ -12,6 +12,10 @@ magick "$img[0]" -strip -scale 10% -blur 0x3 "$cache/rofi-blur.png"
 
 matugen image "$img" --prefer saturation
 
+# the login screen follows: greeter-sync copies `current` for the greeter user
+ln -sfn "$img" "$cache/current"
+~/.local/bin/greeter-sync
+
 # outside a session (first run from the install script) there is nothing to reload
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || exit 0
 
