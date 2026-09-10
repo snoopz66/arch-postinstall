@@ -14,6 +14,7 @@
 #   SETUP_SNAPSHOTS=0  skip snapper + limine snapshot boot entries
 #   SWITCH_TO_NM=0     keep systemd-networkd (wifi then needs iwctl, not nmtui)
 #   NVIDIA_DOCKER=0    skip nvidia-container-toolkit
+#   GIT_NAME, GIT_EMAIL  git identity; asked for at the start when unset and git has none yet
 
 set -euo pipefail
 
@@ -81,6 +82,22 @@ confirm_hypr_reset() {
   fi
 
   rm -rf "$HYPR_DIR"
+}
+
+# Asked up front so the long install does not stop halfway for it; an existing identity is kept
+ask_git_identity() {
+  GIT_NAME=${GIT_NAME:-$(git config --global user.name || true)}
+  GIT_EMAIL=${GIT_EMAIL:-$(git config --global user.email || true)}
+
+  while [[ -z $GIT_NAME ]]; do
+    read -rp "Git name (for commits): " GIT_NAME
+  done
+
+  # something@domain.tld, no spaces
+  while [[ ! $GIT_EMAIL =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]]; do
+    [[ -z $GIT_EMAIL ]] || warn "not an email address: $GIT_EMAIL"
+    read -rp "Git email: " GIT_EMAIL
+  done
 }
 
 # ---------- system ----------
@@ -442,6 +459,14 @@ eval "$(starship init bash)"
 EOF
 }
 
+setup_git() {
+  log "git identity and GitHub credentials"
+  git config --global user.name "$GIT_NAME"
+  git config --global user.email "$GIT_EMAIL"
+  # credential helper via gh; `gh auth login` itself needs a browser, see the summary
+  gh auth setup-git
+}
+
 setup_user() {
   log "user defaults"
   xdg-settings set default-web-browser firefox.desktop 2>/dev/null || true
@@ -513,7 +538,7 @@ Done. Next:
        snapper list && limine-snapper-list
        docker run --rm hello-world                     # after re-login
   5. Wifi: NetworkManager now drives iwd; reconnect with nmtui if needed
-  6. sudo tailscale up ; Dropbox asks to link on first start
+  6. sudo tailscale up ; gh auth login ; Dropbox asks to link on first start
   7. Audio interface: pick the "Pro Audio" profile in pavucontrol for direct channels
   8. Wallpaper and colors: wallpaper ~/Pictures/some.jpg
 EOF
@@ -522,6 +547,7 @@ EOF
 main() {
   preflight
   confirm_hypr_reset
+  ask_git_identity
   setup_pacman
   install_base
   install_yay
@@ -536,6 +562,7 @@ main() {
   install_gaming
   setup_system
   stash_omarchy
+  setup_git
   setup_user
   install_config
   write_machine_config

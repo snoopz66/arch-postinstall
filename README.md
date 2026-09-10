@@ -10,7 +10,7 @@ git clone https://github.com/snoopz66/arch-postinstall && bash arch-postinstall/
 
 Layout: `config/` → `~/.config`, `bin/` → `~/.local/bin`, `etc/` → `/etc`. Existing user files are kept. `monitors.lua` and `input.lua` are generated from `MONITOR`, `MONITOR_MODE`, `KB_LAYOUT` at the top of the script.
 
-Toggles: `INSTALL_GAMING=0 SETUP_SNAPSHOTS=0 SWITCH_TO_NM=0 NVIDIA_DOCKER=0`.
+Toggles: `INSTALL_GAMING=0 SETUP_SNAPSHOTS=0 SWITCH_TO_NM=0 NVIDIA_DOCKER=0`. The script asks for a git name and email at the start unless git already has them or `GIT_NAME`/`GIT_EMAIL` are set.
 
 Change wallpaper and colours: `wallpaper ~/Pictures/some.jpg`.
 
