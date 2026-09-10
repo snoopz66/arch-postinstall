@@ -249,7 +249,7 @@ EOF
 install_shell() {
   log "shell components"
   pac waybar rofi hyprlock hypridle hyprpaper hyprpolkitagent swaync swayosd cliphist \
-    grim slurp satty matugen imagemagick blueman
+    grim slurp satty matugen imagemagick blueman quickshell
   aur wlogout bibata-cursor-theme-bin
 }
 

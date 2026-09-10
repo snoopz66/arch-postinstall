@@ -30,3 +30,8 @@ output_path = "~/.config/swaync/style.css"
 [templates.regreet]
 input_path = "~/.config/matugen/templates/regreet.css"
 output_path = "/var/lib/greeter/regreet.css"
+
+# every Material role as JSON; quickshell's Theme.qml watches it
+[templates.quickshell]
+input_path = "~/.config/matugen/templates/colors.json"
+output_path = "~/.cache/wallpaper/colors.json"

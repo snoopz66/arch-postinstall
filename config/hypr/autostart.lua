@@ -2,6 +2,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("systemctl --user start hyprpolkitagent")
   hl.exec_cmd("hyprpaper")
   hl.exec_cmd("waybar")
+  hl.exec_cmd("qs")
   -- the unit: D-Bus activates it too, a plain exec races that and fails
   hl.exec_cmd("systemctl --user start swaync")
   hl.exec_cmd("swayosd-server")

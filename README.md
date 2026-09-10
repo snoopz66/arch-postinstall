@@ -14,4 +14,6 @@ Toggles: `INSTALL_GAMING=0 SETUP_SNAPSHOTS=0 SWITCH_TO_NM=0 NVIDIA_DOCKER=0`. Th
 
 Change wallpaper and colours: `wallpaper ~/Pictures/some.jpg`.
 
+Widgets are Quickshell (`config/quickshell`), themed from the same matugen palette through `~/.cache/wallpaper/colors.json`. The audio popup (volume, devices, peak meters) opens from the bar's volume module or `qs ipc call audio toggle`.
+
 The login screen (regreet inside Hyprland) mirrors the session: `greeter-sync` copies the wallpaper, colours and monitor layout into `/var/lib/greeter` whenever the wallpaper changes, Hyprland reloads its config or a monitor is (un)plugged.
