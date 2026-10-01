@@ -21,6 +21,8 @@ Singleton {
 
     JsonAdapter {
       id: adapter
+      // the wallpaper the palette came from, for widgets that show it
+      property string image: ""
       // defaults are the stock wall2 palette, used until the file loads
       property string surface: "#101418"
       property string surface_container: "#1c2024"

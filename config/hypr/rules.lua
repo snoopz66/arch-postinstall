@@ -17,7 +17,7 @@ hl.layer_rule({
 -- Browser and editor stay fully opaque
 hl.window_rule({
   name = "opaque-apps",
-  match = { class = "^(firefox|[Cc]ode|code-url-handler)$" },
+  match = { class = "^(firefox|[Cc]ode|code-url-handler|com\\.microsoft\\.VSCode)$" },
   opaque = true,
 })
 
@@ -37,6 +37,21 @@ hl.window_rule({
   match = { title = "^(Open|Save As|Open File|Choose Files|Authentication Required|File Upload).*" },
   float = true,
   center = true,
+})
+
+-- Browser Picture-in-Picture: float, pin to every workspace, sit bottom-right
+-- and do not steal focus from the page that spawned it
+hl.window_rule({
+  name = "picture-in-picture",
+  match = { title = "^(Picture-in-Picture|Picture in Picture)$" },
+  float = true,
+  pin = true,
+  keep_aspect_ratio = true,
+  no_initial_focus = true,
+  -- 16:9, half the screen height wide. move runs before size, so it repeats
+  -- the size expressions instead of using window_w/window_h
+  size = { "monitor_h * 0.5", "monitor_h * 0.28125" },
+  move = { "monitor_w - monitor_h * 0.5 - 20", "monitor_h - monitor_h * 0.28125 - 20" },
 })
 
 hl.window_rule({

@@ -14,7 +14,8 @@ local function bind(keys, dispatcher, desc, opts)
 end
 
 -- Shell
-bind(mod .. " + SPACE", hl.dsp.exec_cmd("rofi -show drun"), "App launcher")
+bind(mod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"), "App launcher")
+bind(mod .. " + C", hl.dsp.exec_cmd("rofi -show calc"), "Calculator (Return copies the result)")
 bind(mod .. " + ALT + SPACE", hl.dsp.exec_cmd("~/.local/bin/quickmenu"), "Quick menu: wallpaper, screenshot, keybinds")
 bind("ALT + TAB", hl.dsp.exec_cmd("rofi -show window"), "Window switcher")
 bind(mod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p Clipboard | cliphist decode | wl-copy"), "Clipboard history")
