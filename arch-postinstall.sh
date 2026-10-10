@@ -248,8 +248,8 @@ EOF
 
 install_shell() {
   log "shell components"
-  pac waybar rofi rofi-calc hyprlock hypridle hyprpaper hyprpolkitagent swaync swayosd cliphist \
-    grim slurp satty matugen imagemagick blueman quickshell
+  pac waybar hyprlock hypridle hyprpaper hyprpolkitagent swaync swayosd cliphist \
+    grim slurp satty matugen blueman quickshell libqalculate hunspell hunspell-en_us
   aur wlogout bibata-cursor-theme-bin
 }
 
@@ -259,7 +259,7 @@ install_dev() {
     lazygit github-cli stow plocate inotify-tools dua-cli \
     neovim ghostty ghostty-nautilus \
     docker docker-compose docker-buildx ducker \
-    openai-codex
+    kubectl openai-codex
   aur visual-studio-code-bin claude-code
 
   sudo usermod -aG docker "$USER"
@@ -453,6 +453,7 @@ alias cat='bat --paging=never'
 alias lg='lazygit'
 source /usr/share/fzf/key-bindings.bash
 source /usr/share/fzf/completion.bash
+source "$HOME/.config/kubectl_aliases.sh"
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
 # <<< postinstall <<<
@@ -495,7 +496,7 @@ install_config() {
   install -d "$HOME/.local/bin"
   cp --update=none "$SRC_DIR"/bin/* "$HOME/.local/bin/"
 
-  # first palette and rofi sidebar images; `wallpaper IMAGE` changes them later
+  # first palette; `wallpaper IMAGE` changes it later
   "$HOME/.local/bin/wallpaper" /usr/share/hypr/wall2.png
 }
 

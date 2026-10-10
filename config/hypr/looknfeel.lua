@@ -30,6 +30,9 @@ hl.config({
     disable_splash_rendering = true,
     force_default_wallpaper = 0,
     middle_click_paste = false,
+    -- Honour xdg-activation requests: a clicked notification or a browser
+    -- opened by xdg-open pulls its window and workspace into focus
+    focus_on_activate = true,
   },
 })
 

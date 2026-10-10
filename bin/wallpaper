@@ -6,10 +6,6 @@ img=$(realpath "$1")
 cache=$HOME/.cache/wallpaper
 mkdir -p "$cache"
 
-# rofi decodes its sidebar image on every open: a 1000px copy and a blurred strip (HyDE wall.thmb, wall.blur)
-magick "$img[0]" -strip -resize 1000 "$cache/rofi.png"
-magick "$img[0]" -strip -scale 10% -blur 0x3 "$cache/rofi-blur.png"
-
 matugen image "$img" --prefer saturation
 
 # the login screen follows: greeter-sync copies `current` for the greeter user

@@ -1,6 +1,6 @@
 # Agent instructions
 
-This repo is the source of truth for this machine's desktop environment: Hyprland, waybar, rofi,
+This repo is the source of truth for this machine's desktop environment: Hyprland, waybar,
 Quickshell, swaync, wlogout, hyprlock, regreet, matugen theming and the helper scripts around them.
 The running system is a *copy* of the repo, not a symlink, so the two drift unless you keep them in
 sync.
@@ -40,7 +40,7 @@ So beyond config files:
 Generated files — edit their source instead:
 
 - matugen outputs: `~/.config/hypr/colors.lua`, `colors-hyprlock.conf`, `hyprpaper.conf`,
-  `~/.config/waybar/theme.css`, `~/.config/rofi/theme.rasi`, `~/.config/swaync/style.css`,
+  `~/.config/waybar/theme.css`, `~/.config/swaync/style.css`,
   `/var/lib/greeter/regreet.css`, `~/.cache/wallpaper/*`. Their sources are
   `config/matugen/templates/*` (mapping in `config/matugen/config.toml`). After editing a template,
   re-run `wallpaper <current image>` to regenerate.
@@ -57,13 +57,13 @@ Also keep secrets, tokens and host-specific paths out of the repo.
 Prefer editing the repo file first, then copying it to the live location:
 
 ```
-cp config/rofi/config.rasi ~/.config/rofi/config.rasi
+cp config/quickshell/Launcher.qml ~/.config/quickshell/Launcher.qml
 ```
 
 Before overwriting a live file, check it has no local edits that the repo lacks:
 
 ```
-git show HEAD:config/rofi/config.rasi | diff - ~/.config/rofi/config.rasi
+git show HEAD:config/quickshell/Launcher.qml | diff - ~/.config/quickshell/Launcher.qml
 ```
 
 If they differ, the live file has drifted — merge the difference into the repo rather than
@@ -78,8 +78,9 @@ The install script copies with `--update=none` (existing user files win), so re-
 ## Verifying
 
 Check the change in the running session where practical: `hyprctl reload` and `hyprctl configerrors`
-for Hyprland, restart the component for waybar/swaync/Quickshell, open the menu and screenshot it
-with `grim` for rofi. Say so plainly if something could not be verified.
+for Hyprland, restart the component for waybar/swaync. Quickshell reloads when its files change:
+open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. Say so plainly if
+something could not be verified.
 
 ## Finishing
 
