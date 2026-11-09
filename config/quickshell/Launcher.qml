@@ -53,12 +53,31 @@ PanelWindow {
     onCleared: launcher.visible = false
   }
 
-  // DesktopEntries fills in after startup, so keep this a binding
-  readonly property var apps: DesktopEntries.applications.values
-    .filter(a => !a.noDisplay)
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+  // launches per desktop entry id, kept across sessions
+  property var usage: ({})
 
-  // name prefix first, then name substring, then generic name / keywords / comment
+  FileView {
+    id: usageFile
+    path: Quickshell.statePath("launcher-usage.json")
+    printErrors: false // there is no file before the first launch
+    onLoaded: launcher.usage = JSON.parse(text())
+  }
+
+  function countLaunch(id: string): void {
+    usage = Object.assign({}, usage, { [id]: (usage[id] ?? 0) + 1 });
+    usageFile.setText(JSON.stringify(usage));
+  }
+
+  // most launched first, then by name. DesktopEntries fills in after startup, so keep this a binding
+  readonly property var apps: {
+    const used = a => usage[a.id] ?? 0;
+    return DesktopEntries.applications.values
+      .filter(a => !a.noDisplay)
+      .sort((a, b) => used(b) - used(a) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  }
+
+  // name prefix first, then name substring, then generic name / keywords / comment; within each,
+  // the order of apps (the sort is not stable, hence the index)
   readonly property var matches: {
     const q = search.text.trim().toLowerCase();
     if (q === "") return apps;
@@ -69,9 +88,9 @@ PanelWindow {
       const rest = [a.genericName, a.comment].concat(a.keywords).join(" ").toLowerCase();
       return rest.includes(q) ? 2 : -1;
     };
-    return apps.map(a => ({ app: a, rank: rank(a) }))
+    return apps.map((a, i) => ({ app: a, rank: rank(a), i: i }))
       .filter(m => m.rank >= 0)
-      .sort((x, y) => x.rank - y.rank)
+      .sort((x, y) => x.rank - y.rank || x.i - y.i)
       .map(m => m.app);
   }
 
@@ -150,6 +169,7 @@ PanelWindow {
     } else {
       entry.execute();
     }
+    if (entry.glyph === undefined) countLaunch(entry.id);
     launcher.visible = false;
   }
 
