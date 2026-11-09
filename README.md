@@ -25,3 +25,5 @@ The other menus are Quickshell too (`Menu.qml`, `WallpaperPicker.qml`), opened w
 Windows that ask for focus get it (`misc:focus_on_activate`): clicking a notification jumps to the window that sent it, and a link opened by another program (`gh auth login`, `xdg-open`) jumps to the browser, switching workspace if needed. Only works for apps whose notifications carry a default action.
 
 The login screen (regreet inside Hyprland) mirrors the session: `greeter-sync` copies the wallpaper, colours and monitor layout into `/var/lib/greeter` whenever the wallpaper changes, Hyprland reloads its config or a monitor is (un)plugged.
+
+SSH: `sshd` is enabled and takes the user's password (`ssh <user>@<host>`). ufw rate-limits port 22: a source making 6 connections in 30 s is dropped.

@@ -385,10 +385,10 @@ EOF
 }
 
 setup_system() {
-  log "system services, zram, firewall"
+  log "system services, zram, firewall, sshd"
   pac pacman-contrib kernel-modules-hook zram-generator ufw
   svc_enable fstrim.timer systemd-timesyncd.service paccache.timer \
-    linux-modules-cleanup.service systemd-oomd.service
+    linux-modules-cleanup.service systemd-oomd.service sshd.service
 
   write_root /etc/systemd/zram-generator.conf <<'EOF'
 [zram0]
@@ -401,6 +401,8 @@ EOF
   sudo ufw allow 53317/tcp comment localsend
   sudo ufw allow 53317/udp comment localsend
   sudo ufw allow in on tailscale0
+  # sshd takes passwords (its default): `limit` drops a source after 6 connections in 30 s
+  sudo ufw limit 22/tcp comment ssh
   sudo ufw --force enable
   # `ufw enable` loads the rules now; only the unit reloads them at boot
   svc_enable ufw.service
