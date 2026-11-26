@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.bar as Bar
 import qs.bar.widgets as Widgets
+import qs.panels.agents as Agents
 import qs.panels.audio as Audio
 import qs.panels.bluetooth as Bluetooth
 import qs.panels.clock as Clock
@@ -84,7 +85,7 @@ Item {
     "power-menu": powerMenu, "workspaces": workspaces, "active-window": activeWindow, "tray": tray,
     "keyboard-layout": keyboardLayout, "indicators": indicators, "microphone": microphone, "spacer": spacer,
     "clock": clock, "media": mediaWidget, "audio": audio, "bluetooth": bluetooth, "network": network,
-    "tailscale": tailscale
+    "tailscale": tailscale, "agents": agents
   })
   Component { id: powerMenu; PowerButton {} }
   Component { id: workspaces; Widgets.Workspaces {} }
@@ -100,6 +101,7 @@ Item {
   Component { id: bluetooth; Bluetooth.Panel {} }
   Component { id: network; Network.Panel {} }
   Component { id: tailscale; Tailscale.Panel {} }
+  Component { id: agents; Agents.Panel {} }
 
   Bar.BarWidgetRegistry { id: registry }
 

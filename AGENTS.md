@@ -42,6 +42,13 @@ So beyond config files:
   own ones beside it (`PowerButton.qml`, `StayAwake.qml`). The code knows widgets as
   `omarchy.<name>`; IPC targets, layer names, scripts and anything shown on screen carry no
   Omarchy name. Strings live in `i18n/en/shell.json`.
+- `config/quickshell/panels/agents` is Omarchy's agents plugin. It only draws the records
+  `bin/bar-agent-usage-update` writes to `~/.local/state/bar/agents/usage`, one
+  `bin/bar-agent-usage-<agent>` collector per agent (Claude, Codex, Gemini here; another comes
+  from Omarchy's `bin/omarchy-agent-usage-<agent>` with its icon in `assets/`). The parts that
+  run Omarchy's own commands (sign-in, default agent, starters, local models) are switched off,
+  not cut: `tests/bar/agents-off.cjs` holds them off. Never print or commit what the collectors
+  read: sign-in tokens and account emails.
 - `config/quickshell/keystroke` is the launcher, from https://github.com/evindor/keystroke (v1.5.2,
   commit 0c74f2d), without its Omarchy menu, bar widget, Smart Match engine and paste helper. The
   same rule applies: patch at the seams (`core/ApplicationLibrary.qml`, `core/Hotkeys.js`,

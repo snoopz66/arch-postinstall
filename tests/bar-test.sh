@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The bar (config/quickshell/{bar,panels,services}, BarHost, bin/bar-*, bin/screenrecord),
-# checked without a compositor.
+# checked without a compositor or a network.
 set -euo pipefail
 
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -30,10 +30,14 @@ fi
 
 # Upstream's tests of the models behind the bar and each panel.
 if command -v node >/dev/null; then
-  for name in bar tray keyboard-layout audio bluetooth network tailscale nightlight; do
+  for name in bar tray keyboard-layout audio bluetooth network tailscale nightlight \
+    agents-notes agents-limits agents-order agents-drag; do
     node "$root/tests/bar/$name.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the $name model passes upstream's tests"; }
   done
   echo "ok - the models pass upstream's tests"
+
+  node "$root/tests/bar/agents-off.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the agents panel's Omarchy-only parts are off"; }
+  echo "ok - the agents panel's Omarchy-only parts are off"
 else
   echo "ok - the models pass upstream's tests # SKIP node is not installed"
 fi
@@ -54,18 +58,23 @@ else
 fi
 
 # Every script the bar's code runs is one this repo installs, and parses.
-called=$(grep -rhoE '"(bar-[a-z-]+|screenrecord)[" ]' "$shell/bar" "$shell/panels" "$shell/services" | tr -d '" ' | sort -u)
+called=$(grep -rhoE --include='*.qml' --include='*.js' '"(bar-[a-z-]+|screenrecord)[" ]' "$shell/bar" "$shell/panels" "$shell/services" | tr -d '" ' | sort -u)
 [[ -n $called ]] || fail "the bar's code names the scripts it runs"
 for script in $called; do
   [[ -x $root/bin/$script ]] || fail "bin/$script, which the bar runs, exists"
 done
 for script in "$root"/bin/bar-* "$root/bin/screenrecord"; do
-  bash -n "$script" || fail "$script parses"
+  if head -1 "$script" | grep -q python; then
+    python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' "$script" || fail "$script parses"
+  else
+    bash -n "$script" || fail "$script parses"
+  fi
 done
 echo "ok - every script the bar runs is installed and parses"
 
-# No Omarchy command is left to call: none of them exist here.
-if left=$(grep -rnE '"omarchy-[a-z-]+|\bomarchy-[a-z-]+ ' "$shell/bar" "$shell/panels" "$shell/services" "$root"/bin/bar-* | grep -vE '^\S+:[0-9]+:\s*(//|#)'); then
+# No Omarchy command is left to call: none of them exist here. The agents panel keeps
+# its own in the parts switched off, which agents-off.cjs holds off.
+if left=$(grep -rnE --exclude-dir=agents '"omarchy-[a-z-]+|\bomarchy-[a-z-]+ ' "$shell/bar" "$shell/panels" "$shell/services" "$root"/bin/bar-* | grep -vE '^\S+:[0-9]+:\s*(//|#)'); then
   printf '%s\n' "$left" >&2
   fail "no Omarchy command is called"
 fi
@@ -76,3 +85,13 @@ echo "ok - bar-dns reads and sets the connection's DNS"
 
 bash "$root/tests/bar/screenrecord-test.sh" "$root/bin/screenrecord" >"$log" 2>&1 || { cat "$log" >&2; fail "screenrecord starts, stops and reports"; }
 echo "ok - screenrecord starts, stops and reports"
+
+bash "$root/tests/bar/agent-usage-update-test.sh" >"$log" 2>&1 || { cat "$log" >&2; fail "the agent usage updater runs its collectors"; }
+echo "ok - the agent usage updater runs its collectors"
+
+if command -v python3 >/dev/null; then
+  bash "$root/tests/bar/agent-usage-test.sh" >"$log" 2>&1 || { cat "$log" >&2; fail "the agent usage collectors print their records"; }
+  echo "ok - the agent usage collectors print their records"
+else
+  echo "ok - the agent usage collectors print their records # SKIP python3 is not installed"
+fi
