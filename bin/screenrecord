@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# screenrecord start|stop|toggle|status: record the screen and what it plays, with
+# gpu-screen-recorder, into ~/Videos/Recordings. status exits 0 while recording.
+# The bar's recording indicator calls it.
+set -euo pipefail
+
+pidfile=${XDG_RUNTIME_DIR:-/tmp}/screenrecord.pid
+dir=$HOME/Videos/Recordings
+
+recording() {
+  [[ -f $pidfile ]] && kill -0 "$(<"$pidfile")" 2>/dev/null
+}
+
+start() {
+  recording && return
+
+  mkdir -p "$dir"
+  # A background job of a script ignores SIGINT, which stop sends: hand the recorder the default back
+  env --default-signal=INT gpu-screen-recorder -w screen -f 60 -a default_output \
+    -o "$dir/$(date +%Y%m%d-%H%M%S).mp4" >/dev/null 2>&1 &
+  echo $! >"$pidfile"
+  disown
+  qs ipc call indicators refresh >/dev/null 2>&1 || true
+}
+
+stop() {
+  recording || return 0
+
+  local pid
+  pid=$(<"$pidfile")
+  # SIGINT lets the recorder finish the file
+  kill -INT "$pid"
+  tail --pid="$pid" -f /dev/null
+  rm -f "$pidfile"
+  notify-send -a "Screen recording" "Recording saved" "$dir"
+  qs ipc call indicators refresh >/dev/null 2>&1 || true
+}
+
+case ${1:-toggle} in
+  start) start ;;
+  stop) stop ;;
+  toggle) if recording; then stop; else start; fi ;;
+  status) recording ;;
+  *)
+    echo "Usage: screenrecord [start|stop|toggle|status]" >&2
+    exit 2
+    ;;
+esac

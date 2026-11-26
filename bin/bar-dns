@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# bar-dns [DHCP|Cloudflare|Google]: print, or set, whose DNS servers the network connection in use
+# asks. The bar's network panel calls it. It changes that one NetworkManager connection, which
+# needs no password.
+set -euo pipefail
+
+declare -A v4=([Cloudflare]="1.1.1.1 1.0.0.1" [Google]="8.8.8.8 8.8.4.4")
+declare -A v6=(
+  [Cloudflare]="2606:4700:4700::1111 2606:4700:4700::1001"
+  [Google]="2001:4860:4860::8888 2001:4860:4860::8844"
+)
+
+# "uuid device" of the Wi-Fi or wired connection in use
+read -r connection device < <(LC_ALL=C nmcli -g UUID,TYPE,DEVICE connection show --active |
+  awk -F: '$2 ~ /wireless|ethernet/ { print $1, $3; exit }') || true
+
+current() {
+  local servers provider
+
+  [[ -n $connection ]] || { echo "DHCP"; return; }
+  servers=$(nmcli -g ipv4.dns connection show "$connection")
+  [[ -n $servers ]] || { echo "DHCP"; return; }
+
+  for provider in "${!v4[@]}"; do
+    [[ ${servers//,/ } == "${v4[$provider]}" ]] && { echo "$provider"; return; }
+  done
+  echo "Custom"
+}
+
+provider=${1:-}
+if [[ -z $provider ]]; then
+  current
+  exit 0
+fi
+
+if [[ $provider != "DHCP" && -z ${v4[$provider]:-} ]]; then
+  echo "Usage: bar-dns [DHCP|Cloudflare|Google]" >&2
+  exit 2
+fi
+
+if [[ -z $connection ]]; then
+  echo "bar-dns: no Wi-Fi or wired connection in use" >&2
+  exit 1
+fi
+
+if [[ $provider == "DHCP" ]]; then
+  nmcli connection modify "$connection" ipv4.dns "" ipv4.ignore-auto-dns no ipv6.dns "" ipv6.ignore-auto-dns no
+else
+  nmcli connection modify "$connection" ipv4.dns "${v4[$provider]}" ipv4.ignore-auto-dns yes \
+    ipv6.dns "${v6[$provider]}" ipv6.ignore-auto-dns yes
+fi
+nmcli device reapply "$device" >/dev/null

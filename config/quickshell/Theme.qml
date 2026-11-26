@@ -1,5 +1,5 @@
 // Colors from the wallpaper: matugen renders every Material role into colors.json (see matugen/config.toml),
-// the FileView re-reads it on change so widgets recolor live. Fonts and radii match the waybar pills.
+// the FileView re-reads it on change so widgets recolor live.
 pragma Singleton
 import QtQuick
 import Quickshell

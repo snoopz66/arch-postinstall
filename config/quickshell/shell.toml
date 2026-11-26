@@ -14,3 +14,10 @@ background       = "background"
 background-alpha = 0.8
 border           = "accent"
 border-alpha     = 0.9
+
+# the panels the bar opens (panels/)
+[popups]
+background       = "background"
+background-alpha = 0.8
+border           = "accent"
+border-alpha     = 0.9

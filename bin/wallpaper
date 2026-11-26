@@ -17,4 +17,3 @@ ln -sfn "$img" "$cache/current"
 
 hyprctl hyprpaper wallpaper ",$img"
 hyprctl reload
-pkill -SIGUSR2 waybar || true

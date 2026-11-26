@@ -63,7 +63,7 @@ Item {
 
   // ------------------------------------------------------------- the bar
   //
-  // The deck hangs from the top-right corner. waybar reserves its own room
+  // The deck hangs from the top-right corner. The bar reserves its own room
   // (the surface honours exclusive zones), so only the gap is left to keep.
   function marginsFor(screenName) {
     return { top: Style.gapsOut, right: Style.gapsOut }

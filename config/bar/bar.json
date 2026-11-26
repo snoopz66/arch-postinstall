@@ -1,0 +1,52 @@
+{
+  "position": "top",
+  "background": "glassy",
+  "layout": {
+    "left": [
+      {
+        "id": "power-menu"
+      },
+      {
+        "id": "workspaces"
+      }
+    ],
+    "centerBegin": [
+      {
+        "id": "indicators"
+      }
+    ],
+    "center": [
+      {
+        "id": "clock",
+        "format": "dddd HH:mm",
+        "formatAlt": "d MMMM 'W'ww yyyy",
+        "weekStartDay": "monday"
+      }
+    ],
+    "centerEnd": [
+      {
+        "id": "media"
+      }
+    ],
+    "right": [
+      {
+        "id": "tray"
+      },
+      {
+        "id": "keyboard-layout"
+      },
+      {
+        "id": "tailscale"
+      },
+      {
+        "id": "bluetooth"
+      },
+      {
+        "id": "audio"
+      },
+      {
+        "id": "network"
+      }
+    ]
+  }
+}

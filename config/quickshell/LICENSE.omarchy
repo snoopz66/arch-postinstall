@@ -1,6 +1,7 @@
-Commons/, Ui/, notifications/, i18n/ and keystroke/data/emojis.json come from Omarchy
-(https://github.com/omacom/omarchy, branch quattro, commit b6f920a), adapted
-to this shell. The notification engine began as Omapager
+Commons/, Ui/, notifications/, bar/, panels/, services/, i18n/ and
+keystroke/data/emojis.json come from Omarchy (https://github.com/omacom/omarchy,
+branch quattro, commit b6f920a), adapted to this shell, as do the bar-* scripts
+in bin/ (but bar-dns) and tests/bar/*.cjs. The notification engine began as Omapager
 (https://github.com/omacom/omapager), Copyright (c) 2026 Neil Jagdish Patel,
 under the same licence.
 

@@ -1,29 +1,19 @@
-// Quickshell widgets, popups next to waybar. Docs: https://quickshell.org/docs/
-// Toggle from waybar or a keybind: qs ipc call audio toggle, launcher toggle, wallpapers toggle,
-// menu toggle windows|clipboard, notifications showHistory|toggleDnd|dismissAll|...
+// The shell: bar and its panels, launcher, menus, notifications. Docs: https://quickshell.org/docs/
+// Toggle from a keybind: qs ipc call launcher toggle, wallpapers toggle, menu toggle windows|clipboard,
+// bar toggle, audio|network|bluetooth|clock|tailscale toggle, notifications showHistory|toggleDnd|...
 import Quickshell
 import Quickshell.Io
 import qs.keystroke as Keystroke
 import qs.notifications as Notifications
 
 ShellRoot {
-  AudioPanel { id: audio }
+  BarHost { notifications: notifications }
   Keystroke.Keystroke { id: launcher }
   Menu { id: menu }
   WallpaperPicker { id: wallpapers }
 
-  // the notification daemon; waybar's bell re-reads Do Not Disturb on signal 8
-  Notifications.Service {
-    onDoNotDisturbChanged: Quickshell.execDetached(["pkill", "-RTMIN+8", "waybar"])
-  }
-
-  IpcHandler {
-    target: "audio"
-    function toggle(): void { audio.visible = !audio.visible; }
-    // not "show"/"hide": those are subcommands of `qs ipc` and the CLI eats them
-    function open(): void { audio.visible = true; }
-    function close(): void { audio.visible = false; }
-  }
+  // the notification daemon
+  Notifications.Service { id: notifications }
 
   IpcHandler {
     target: "launcher"

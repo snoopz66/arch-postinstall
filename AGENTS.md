@@ -1,7 +1,7 @@
 # Agent instructions
 
-This repo is the source of truth for this machine's desktop environment: Hyprland, waybar,
-Quickshell, wlogout, hyprlock, regreet, matugen theming and the helper scripts around them.
+This repo is the source of truth for this machine's desktop environment: Hyprland,
+Quickshell (bar, launcher, notifications), wlogout, hyprlock, regreet, matugen theming and the helper scripts around them.
 The running system is a *copy* of the repo, not a symlink, so the two drift unless you keep them in
 sync.
 
@@ -36,6 +36,12 @@ So beyond config files:
 - Changed behaviour a user would notice (new keybind, new script, new toggle) → update `README.md`.
 - `config/quickshell/{Commons,Ui,notifications,i18n}` come from Omarchy (`LICENSE.omarchy` names
   the commit). Keep local changes there small, so upstream fixes can still be diffed in.
+- `config/quickshell/{bar,panels,services}` is Omarchy's bar from the same commit, with the
+  `bin/bar-*` scripts it runs (`omarchy-*` upstream). The same rule applies. `BarHost.qml` stands in
+  for Omarchy's shell host and lists the widgets a layout can name; a new widget goes there, our
+  own ones beside it (`PowerButton.qml`, `StayAwake.qml`). The code knows widgets as
+  `omarchy.<name>`; IPC targets, layer names, scripts and anything shown on screen carry no
+  Omarchy name. Strings live in `i18n/en/shell.json`.
 - `config/quickshell/keystroke` is the launcher, from https://github.com/evindor/keystroke (v1.5.2,
   commit 0c74f2d), without its Omarchy menu, bar widget, Smart Match engine and paste helper. The
   same rule applies: patch at the seams (`core/ApplicationLibrary.qml`, `core/Hotkeys.js`,
@@ -47,7 +53,7 @@ So beyond config files:
 Generated files — edit their source instead:
 
 - matugen outputs: `~/.config/hypr/colors.lua`, `colors-hyprlock.conf`, `hyprpaper.conf`,
-  `~/.config/waybar/theme.css`, `/var/lib/greeter/regreet.css`, `~/.cache/wallpaper/*`. Their sources are
+  `~/.config/wlogout/theme.css`, `/var/lib/greeter/regreet.css`, `~/.cache/wallpaper/*`. Their sources are
   `config/matugen/templates/*` (mapping in `config/matugen/config.toml`). After editing a template,
   re-run `wallpaper <current image>` to regenerate.
 - Machine-specific Hyprland files: `~/.config/hypr/monitors.lua` and `input.lua`. They are written
@@ -57,6 +63,8 @@ Generated files — edit their source instead:
 - `/var/lib/greeter/*` — mirrored from the session by `bin/greeter-sync`.
 - `~/.config/keystroke/keystroke.json` is written by the launcher's settings screen. Copy a
   setting back into `config/keystroke/keystroke.json` only when it should be the default.
+- `~/.config/bar/bar.json` is rewritten by the bar (a moved widget, a changed clock format). The
+  same goes for `config/bar/bar.json`.
 
 Also keep secrets, tokens and host-specific paths out of the repo.
 
@@ -86,11 +94,13 @@ The install script copies with `--update=none` (existing user files win), so re-
 ## Verifying
 
 Check the change in the running session where practical: `hyprctl reload` and `hyprctl configerrors`
-for Hyprland, restart the component for waybar. Quickshell reloads when its files change:
+for Hyprland. Quickshell reloads when its files change:
 open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. After touching
 `config/quickshell/notifications`, run `tests/notifications-test.sh`; after touching the launcher
 (`config/quickshell/keystroke`, `config/keystroke`), `tests/keystroke-test.sh`; after touching
-`Menu.qml` or a bind that opens it, `tests/menu-test.sh`. Say so plainly if something could not be
+`Menu.qml` or a bind that opens it, `tests/menu-test.sh`; after touching the bar
+(`config/quickshell/{bar,panels,services}`, `BarHost.*`, `config/bar`, `bin/bar-*`,
+`bin/screenrecord`), `tests/bar-test.sh`. Say so plainly if something could not be
 verified.
 
 ## Finishing

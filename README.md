@@ -1,6 +1,6 @@
 # arch-postinstall
 
-Post-archinstall setup: NVIDIA (open DKMS), Hyprland (Lua config), a HyDE-styled shell (waybar, Quickshell, hyprlock, wlogout, regreet) coloured from the wallpaper by matugen, dev tools, snapper + Limine snapshots.
+Post-archinstall setup: NVIDIA (open DKMS), Hyprland (Lua config), a Quickshell shell (bar, launcher, notifications) with hyprlock, wlogout and regreet, coloured from the wallpaper by matugen, dev tools, snapper + Limine snapshots.
 
 Run as your user after first boot:
 
@@ -16,7 +16,11 @@ Change wallpaper and colours: `wallpaper ~/Pictures/some.jpg`.
 
 kubectl aliases (`config/kubectl_aliases.sh`, sourced from `~/.bashrc`): `k`, then verb and resource initials (`kgp` get pods, `kdd` describe deployment, `klf` logs -f), plus `kns`/`kctx` to switch namespace and context. The file's header explains the pattern.
 
-Widgets are Quickshell (`config/quickshell`), themed from the same matugen palette through `~/.cache/wallpaper/colors.json`. The audio popup (volume, devices, peak meters) opens from the bar's volume module or `qs ipc call audio toggle`.
+The shell is Quickshell (`config/quickshell`), themed from the same matugen palette through `~/.cache/wallpaper/colors.json`.
+
+The bar is [Omarchy](https://github.com/omacom/omarchy)'s (`config/quickshell/{bar,panels,services}`, see `LICENSE.omarchy`), without its branding, menu and updater. Left to right: power menu, workspaces, status indicators (screen recording, night light, Do Not Disturb, stay awake; the idle ones appear on hover), clock, now playing, tray, keyboard layout, Tailscale, Bluetooth, audio, network. A click opens a widget's panel: calendar, volume and devices, Wi-Fi with a DNS switch (DHCP, Cloudflare, Google), Bluetooth devices, Tailscale machines. Right-click the clock to change its format. The panels also open with `qs ipc call audio|network|bluetooth|clock|tailscale toggle`; `qs ipc call bar toggle` hides the bar. Drag a widget to move it, drag the bar itself to another screen edge, double-click an empty stretch of it to change its background.
+
+The layout is `~/.config/bar/bar.json` (`config/bar/`): `position` (`top`, `bottom`, `left`, `right`), `background` (`glassy`, `opaque`, `none`) and the widgets per section. Also available: `active-window`, `microphone`, `spacer`. The bar rewrites the file when a widget's setting changes. `screenrecord [start|stop|toggle]` records the screen into `~/Videos/Recordings`; the indicator starts and stops it too.
 
 The launcher (`Super+Space`) is [Keystroke](https://github.com/evindor/keystroke) (`config/quickshell/keystroke`, v1.5.2, adapted from its Omarchy plugin; MIT, see its `LICENSE`). Type anything: apps (the ones you pick most rise), files and folders under `~`, a sum (`128 * 1.24`, `15% of 80`), a conversion (`5 km to miles`, `10am pt`), a colour (`#ff6644`), a web address, or a Hyprland keybind by what it does (`lock`, `fullscreen`), which `Return` then runs. Prefixes narrow it: `:` emoji, `~` files only, `>` open windows, `sp` spell check (`sp recieve`; a lone word is also checked below the other results), `/` lists them all. `Return` runs the row, `Ctrl+Return` its second action, `Escape` closes, `Ctrl+,` opens the settings. Clipboard history (cliphist), every keybind and the extensions have screens of their own from the first list. Wallpaper and Screenshot are on the first list too and found by name, and `keybinds` finds the keybind screen. It can also be opened with `qs ipc call launcher toggle`.
 

@@ -1,7 +1,7 @@
 -- Shell layers: blur behind them, no Hyprland layer animation. Quickshell windows are named qs-*
 hl.layer_rule({
   name = "shell",
-  match = { namespace = "^(waybar|swayosd|logout_dialog|qs-.*)$" },
+  match = { namespace = "^(swayosd|logout_dialog|qs-.*)$" },
   no_anim = true,
   blur = true,
 })
@@ -10,7 +10,7 @@ hl.layer_rule({
 -- transparent window blurs the whole screen behind the buttons
 hl.layer_rule({
   name = "shell-ignore-alpha",
-  match = { namespace = "^(waybar|swayosd|qs-.*)$" },
+  match = { namespace = "^(swayosd|qs-.*)$" },
   ignore_alpha = 0,
 })
 
@@ -25,7 +25,7 @@ hl.window_rule({
 hl.window_rule({
   name = "float-tools",
   match = {
-    class = "^(com\\.gabm\\.satty|org\\.pulseaudio\\.pavucontrol|blueman-manager|nm-connection-editor"
+    class = "^(com\\.gabm\\.satty|org\\.pulseaudio\\.pavucontrol|nm-connection-editor"
       .. "|hyprland-share-picker|hyprpolkitagent|xdg-desktop-portal-gtk|org\\.gnome\\.Loupe)$",
   },
   float = true,

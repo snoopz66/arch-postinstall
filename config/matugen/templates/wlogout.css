@@ -1,0 +1,4 @@
+/* HyDE wlogout colors (wallbash/theme/waybar.dcol) mapped to Material roles */
+@define-color main-bg alpha({{colors.surface.default.hex}}, 0.8);
+@define-color wb-act-bg alpha({{colors.tertiary.default.hex}}, 0.4);
+@define-color wb-hvr-bg alpha({{colors.secondary.default.hex}}, 0.4);

@@ -248,8 +248,9 @@ EOF
 
 install_shell() {
   log "shell components"
-  pac waybar hyprlock hypridle hyprpaper hyprpolkitagent swayosd cliphist \
-    grim slurp satty matugen blueman quickshell python hunspell hunspell-en_us
+  pac hyprlock hypridle hyprpaper hyprpolkitagent swayosd cliphist \
+    grim slurp satty matugen quickshell python hunspell hunspell-en_us \
+    hyprsunset iw libnotify
   aur wlogout bibata-cursor-theme-bin
 }
 
@@ -540,8 +541,8 @@ Done. Next:
        sudo cat /sys/module/nvidia_drm/parameters/modeset   # Y
        snapper list && limine-snapper-list
        docker run --rm hello-world                     # after re-login
-  5. Wifi: NetworkManager now drives iwd; reconnect with nmtui if needed
-  6. sudo tailscale up ; gh auth login ; Dropbox asks to link on first start
+  5. Wifi: NetworkManager now drives iwd; reconnect from the bar's network panel if needed
+  6. sudo tailscale up --operator=$USER ; gh auth login ; Dropbox asks to link on first start
   7. Audio interface: pick the "Pro Audio" profile in pavucontrol for direct channels
   8. Wallpaper and colors: wallpaper ~/Pictures/some.jpg
 EOF

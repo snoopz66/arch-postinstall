@@ -14,9 +14,9 @@ output_path = "~/.config/hypr/colors-hyprlock.conf"
 input_path = "~/.config/matugen/templates/hyprpaper.conf"
 output_path = "~/.config/hypr/hyprpaper.conf"
 
-[templates.waybar]
-input_path = "~/.config/matugen/templates/waybar.css"
-output_path = "~/.config/waybar/theme.css"
+[templates.wlogout]
+input_path = "~/.config/matugen/templates/wlogout.css"
+output_path = "~/.config/wlogout/theme.css"
 
 # the login screen; /var/lib/greeter is created by arch-postinstall.sh, see bin/greeter-sync
 [templates.regreet]
