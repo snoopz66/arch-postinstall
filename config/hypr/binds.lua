@@ -18,7 +18,7 @@ bind(mod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"), "App lau
 bind(mod .. " + ALT + SPACE", hl.dsp.exec_cmd("qs ipc call menu toggle quick"), "Quick menu: wallpaper, screenshot, keybinds")
 bind("ALT + TAB", hl.dsp.exec_cmd("qs ipc call menu toggle windows"), "Window switcher")
 bind(mod .. " + V", hl.dsp.exec_cmd("qs ipc call menu toggle clipboard"), "Clipboard history")
-bind(mod .. " + S", hl.dsp.exec_cmd("swaync-client -t"), "Notification panel")
+bind(mod .. " + S", hl.dsp.exec_cmd("qs ipc call notifications showHistory"), "Recent notifications")
 bind(mod .. " + ESCAPE", hl.dsp.exec_cmd("~/.local/bin/logoutmenu"), "Power menu")
 bind(mod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"), "Lock screen")
 bind("PRINT", hl.dsp.exec_cmd("~/.local/bin/screenshot region"), "Screenshot a region")

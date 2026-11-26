@@ -1,0 +1,9 @@
+# Overrides for the Omarchy-derived kit (Commons/Color.qml, Commons/Style.qml):
+# per-surface colors and alphas, [font] base-size, [spacing] scale.
+# An alpha needs its color named beside it (a role: foreground, background,
+# accent, urgent, muted; or a hex).
+[notifications]
+background       = "background"
+background-alpha = 0.8
+border           = "accent"
+border-alpha     = 0.9

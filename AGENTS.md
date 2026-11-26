@@ -1,7 +1,7 @@
 # Agent instructions
 
 This repo is the source of truth for this machine's desktop environment: Hyprland, waybar,
-Quickshell, swaync, wlogout, hyprlock, regreet, matugen theming and the helper scripts around them.
+Quickshell, wlogout, hyprlock, regreet, matugen theming and the helper scripts around them.
 The running system is a *copy* of the repo, not a symlink, so the two drift unless you keep them in
 sync.
 
@@ -34,14 +34,15 @@ So beyond config files:
 - Added a new file under `etc/` → also add the `install` line for it in the script (`etc/` is not
   copied wholesale, unlike `config/` and `bin/`).
 - Changed behaviour a user would notice (new keybind, new script, new toggle) → update `README.md`.
+- `config/quickshell/{Commons,Ui,notifications,i18n}` come from Omarchy (`LICENSE.omarchy` names
+  the commit). Keep local changes there small, so upstream fixes can still be diffed in.
 
 ## Do not copy these into the repo
 
 Generated files — edit their source instead:
 
 - matugen outputs: `~/.config/hypr/colors.lua`, `colors-hyprlock.conf`, `hyprpaper.conf`,
-  `~/.config/waybar/theme.css`, `~/.config/swaync/style.css`,
-  `/var/lib/greeter/regreet.css`, `~/.cache/wallpaper/*`. Their sources are
+  `~/.config/waybar/theme.css`, `/var/lib/greeter/regreet.css`, `~/.cache/wallpaper/*`. Their sources are
   `config/matugen/templates/*` (mapping in `config/matugen/config.toml`). After editing a template,
   re-run `wallpaper <current image>` to regenerate.
 - Machine-specific Hyprland files: `~/.config/hypr/monitors.lua` and `input.lua`. They are written
@@ -78,8 +79,9 @@ The install script copies with `--update=none` (existing user files win), so re-
 ## Verifying
 
 Check the change in the running session where practical: `hyprctl reload` and `hyprctl configerrors`
-for Hyprland, restart the component for waybar/swaync. Quickshell reloads when its files change:
-open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. Say so plainly if
+for Hyprland, restart the component for waybar. Quickshell reloads when its files change:
+open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. After touching
+`config/quickshell/notifications`, run `tests/notifications-test.sh`. Say so plainly if
 something could not be verified.
 
 ## Finishing

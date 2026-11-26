@@ -1,14 +1,20 @@
 // Quickshell widgets, popups next to waybar. Docs: https://quickshell.org/docs/
 // Toggle from waybar or a keybind: qs ipc call audio toggle, launcher toggle, wallpapers toggle,
-// menu toggle quick|windows|clipboard|keybinds
+// menu toggle quick|windows|clipboard|keybinds, notifications showHistory|toggleDnd|dismissAll|...
 import Quickshell
 import Quickshell.Io
+import qs.notifications as Notifications
 
 ShellRoot {
   AudioPanel { id: audio }
   Launcher { id: launcher }
   Menu { id: menu; onWallpaperPicker: wallpapers.open() }
   WallpaperPicker { id: wallpapers }
+
+  // the notification daemon; waybar's bell re-reads Do Not Disturb on signal 8
+  Notifications.Service {
+    onDoNotDisturbChanged: Quickshell.execDetached(["pkill", "-RTMIN+8", "waybar"])
+  }
 
   IpcHandler {
     target: "audio"

@@ -78,23 +78,17 @@
     "interval": 2,
     "on-click": "ghostty -e nmtui"
   },
+  // a bell, struck through while Do Not Disturb is on; quickshell sends signal 8 when that changes
   "custom/notification": {
-    "exec": "swaync-client -swb",
+    "exec": "printf '{\"alt\":\"%s\"}\\n' \"$(qs ipc call notifications isDnd)\"",
     "return-type": "json",
+    "interval": "once",
+    "signal": 8,
     "format": "{icon}",
-    "format-icons": {
-      "notification": "<span foreground='red'><sup></sup></span>",
-      "none": "",
-      "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": "",
-      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "inhibited-none": "",
-      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-inhibited-none": ""
-    },
-    "on-click": "swaync-client -t -sw",
-    "on-click-right": "swaync-client -d -sw",
-    "escape": true
+    "format-icons": { "on": "󰂛", "default": "󰂚" },
+    "tooltip-format": "Click: recent notifications\nRight-click: Do Not Disturb",
+    "on-click": "qs ipc call notifications showHistory",
+    "on-click-right": "qs ipc call notifications toggleDnd"
   },
   "clock": {
     "format": "󰃭 {:%a %d %b   %H:%M}",

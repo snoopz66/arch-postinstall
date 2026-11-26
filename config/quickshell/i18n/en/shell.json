@@ -1,0 +1,25 @@
+{
+  "common.cancel": "Cancel",
+  "common.confirm": "Confirm",
+  "common.loading": "Loading…",
+  "common.noMatches": "No matches",
+  "common.noOptions": "No options",
+  "common.noneSelected": "None selected",
+  "common.search": "Search...",
+  "multiSelect.exited": "Options command exited %1",
+  "multiSelect.invalidJson": "Options command emitted invalid JSON",
+  "multiSelect.selectedCount": {
+    "one": "%1 selected",
+    "other": "%1 selected"
+  },
+  "multiSelect.timedOut": "Options command timed out",
+  "notifications.copyCode": "Copy code",
+  "notifications.copyThisCode": "Copy %1",
+  "notifications.minutesAgo": "%1m",
+  "notifications.noneRecent": "No recent notifications",
+  "notifications.redactedBody": "Code hidden",
+  "notifications.redactedSummary": "Verification notification",
+  "notifications.yesterday": "yesterday",
+  "speedtest.measureAgain": "Measure again",
+  "speedtest.runAgain": "Run Again"
+}

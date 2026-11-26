@@ -18,10 +18,6 @@ output_path = "~/.config/hypr/hyprpaper.conf"
 input_path = "~/.config/matugen/templates/waybar.css"
 output_path = "~/.config/waybar/theme.css"
 
-[templates.swaync]
-input_path = "~/.config/matugen/templates/swaync.css"
-output_path = "~/.config/swaync/style.css"
-
 # the login screen; /var/lib/greeter is created by arch-postinstall.sh, see bin/greeter-sync
 [templates.regreet]
 input_path = "~/.config/matugen/templates/regreet.css"
@@ -31,3 +27,8 @@ output_path = "/var/lib/greeter/regreet.css"
 [templates.quickshell]
 input_path = "~/.config/matugen/templates/colors.json"
 output_path = "~/.cache/wallpaper/colors.json"
+
+# the same palette for quickshell/Commons/Color.qml, which watches it
+[templates.quickshell-kit]
+input_path = "~/.config/matugen/templates/colors.toml"
+output_path = "~/.cache/wallpaper/colors.toml"

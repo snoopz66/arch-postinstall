@@ -1,6 +1,6 @@
 # arch-postinstall
 
-Post-archinstall setup: NVIDIA (open DKMS), Hyprland (Lua config), a HyDE-styled shell (waybar, Quickshell, hyprlock, wlogout, swaync, regreet) coloured from the wallpaper by matugen, dev tools, snapper + Limine snapshots.
+Post-archinstall setup: NVIDIA (open DKMS), Hyprland (Lua config), a HyDE-styled shell (waybar, Quickshell, hyprlock, wlogout, regreet) coloured from the wallpaper by matugen, dev tools, snapper + Limine snapshots.
 
 Run as your user after first boot:
 
@@ -22,7 +22,9 @@ The app launcher (`Super+Space`, `config/quickshell/Launcher.qml`): type to filt
 
 The other menus are Quickshell too (`Menu.qml`, `WallpaperPicker.qml`), opened with `qs ipc call menu toggle <list>`: `quick` (`Super+Alt+Space`: wallpaper, screenshot, keybinds), `windows` (`Alt+Tab`, most recent first, the previous window preselected), `clipboard` (`Super+V`, cliphist) and `keybinds`. The wallpaper picker is `qs ipc call wallpapers toggle`: thumbnails of `~/Pictures/Wallpapers` and the stock walls.
 
-Windows that ask for focus get it (`misc:focus_on_activate`): clicking a notification jumps to the window that sent it, and a link opened by another program (`gh auth login`, `xdg-open`) jumps to the browser, switching workspace if needed. Only works for apps whose notifications carry a default action.
+Notifications are Quickshell too (`config/quickshell/notifications`, from [Omarchy](https://github.com/omacom/omarchy) along with its `Commons` and `Ui` kit, see `LICENSE.omarchy`). Cards stack per app or site in the top-right corner and open on hover. A click runs the sender's default action or jumps to its window; right-click or the `✕` dismisses. Action buttons sit along the card's bottom edge, and a verification code gets a copy button. `Super+S` or a click on the bar's bell puts the last few back on screen (kept for a day in `~/.local/state/quickshell/notifications`); right-click the bell for Do Not Disturb. The rest is IPC, for keybinds of your own: `qs ipc call notifications act|dismissOne|dismissAll|keyboard|toggleDnd`. Card colours and opacity are in `config/quickshell/shell.toml`.
+
+Windows that ask for focus get it (`misc:focus_on_activate`): clicking a notification jumps to the window that sent it, and a link opened by another program (`gh auth login`, `xdg-open`) jumps to the browser, switching workspace if needed.
 
 The login screen (regreet inside Hyprland) mirrors the session: `greeter-sync` copies the wallpaper, colours and monitor layout into `/var/lib/greeter` whenever the wallpaper changes, Hyprland reloads its config or a monitor is (un)plugged.
 
