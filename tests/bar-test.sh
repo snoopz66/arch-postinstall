@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# The bar (config/quickshell/{bar,panels,services}, BarHost, bin/bar-*, bin/screenrecord),
-# checked without a compositor or a network.
+# The bar (config/quickshell/{bar,panels,services}, BarHost, bin/bar-*, bin/screenrecord,
+# config/hypr/monitor-settings.lua), checked without a compositor or a network.
 set -euo pipefail
 
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -31,7 +31,7 @@ fi
 # Upstream's tests of the models behind the bar and each panel.
 if command -v node >/dev/null; then
   for name in bar tray keyboard-layout audio bluetooth network tailscale nightlight \
-    agents-notes agents-limits agents-order agents-drag; do
+    agents-notes agents-limits agents-order agents-drag monitor; do
     node "$root/tests/bar/$name.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the $name model passes upstream's tests"; }
   done
   echo "ok - the models pass upstream's tests"
@@ -41,6 +41,12 @@ if command -v node >/dev/null; then
 
   node "$root/tests/bar/agents-off.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the agents panel's Omarchy-only parts are off"; }
   echo "ok - the agents panel's Omarchy-only parts are off"
+
+  node "$root/tests/bar/monitor-off.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the display panel's Mirror is off"; }
+  echo "ok - the display panel's Mirror is off"
+
+  node "$root/tests/bar/dropbox.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the Dropbox panel reads a status, and runs what is here"; }
+  echo "ok - the Dropbox panel reads a status, and runs what is here"
 else
   echo "ok - the models pass upstream's tests # SKIP node is not installed"
 fi
@@ -97,4 +103,35 @@ if command -v python3 >/dev/null; then
   echo "ok - the agent usage collectors print their records"
 else
   echo "ok - the agent usage collectors print their records # SKIP python3 is not installed"
+fi
+
+# The display panel's scripts, against a fake hyprctl, ddcutil, gsettings and pkill.
+if command -v jq >/dev/null; then
+  bash "$root/tests/bar/monitor-state-test.sh" "$root/bin/bar-monitor-state" >"$log" 2>&1 || { cat "$log" >&2; fail "bar-monitor-state answers the display panel line by line"; }
+  echo "ok - bar-monitor-state answers the display panel line by line"
+
+  bash "$root/tests/bar/monitor-scripts-test.sh" "$root/bin" >"$log" 2>&1 || { cat "$log" >&2; fail "scale, resolution, rotation and layout are applied and saved"; }
+  echo "ok - scale, resolution, rotation and layout are applied and saved"
+else
+  echo "ok - the display panel's scripts apply and save # SKIP jq is not installed"
+fi
+
+bash "$root/tests/bar/brightness-ddc-test.sh" "$root/bin/bar-brightness-display-ddc" >"$log" 2>&1 || { cat "$log" >&2; fail "bar-brightness-display-ddc reads and sets a monitor's brightness"; }
+echo "ok - bar-brightness-display-ddc reads and sets a monitor's brightness"
+
+bash "$root/tests/bar/display-text-size-test.sh" "$root/bin/bar-display-text-size" >"$log" 2>&1 || { cat "$log" >&2; fail "bar-display-text-size sets the shell, GTK and Ghostty together"; }
+echo "ok - bar-display-text-size sets the shell, GTK and Ghostty together"
+
+if command -v lua >/dev/null; then
+  bash "$root/tests/bar/monitor-settings-test.sh" "$root/config/hypr/monitor-settings.lua" >"$log" 2>&1 || { cat "$log" >&2; fail "saved display settings are applied to their monitor"; }
+  echo "ok - saved display settings are applied to their monitor"
+else
+  echo "ok - saved display settings are applied to their monitor # SKIP lua is not installed"
+fi
+
+if command -v python3 >/dev/null && command -v jq >/dev/null; then
+  bash "$root/tests/bar/dropbox-status-test.sh" "$shell/panels/dropbox/status.py" >"$log" 2>&1 || { cat "$log" >&2; fail "the Dropbox status helper reports the account"; }
+  echo "ok - the Dropbox status helper reports the account"
+else
+  echo "ok - the Dropbox status helper reports the account # SKIP python3 or jq is not installed"
 fi

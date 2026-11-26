@@ -49,6 +49,14 @@ So beyond config files:
   run Omarchy's own commands (sign-in, default agent, starters, local models) are switched off,
   not cut: `tests/bar/agents-off.cjs` holds them off. Never print or commit what the collectors
   read: sign-in tokens and account emails.
+- `config/quickshell/panels/monitor` is Omarchy's display panel, with the scripts it runs:
+  `bin/bar-monitor-state`, `bin/bar-hyprland-monitor-*`, `bin/bar-brightness-display-ddc`,
+  `bin/bar-display-text-size`. What it sets is saved per monitor in
+  `~/.local/state/bar/monitors/settings` and applied after `monitors.lua` by
+  `config/hypr/monitor-settings.lua`, also Omarchy's. Its Mirror runs Omarchy's Hyprland toggles
+  and is switched off: `tests/bar/monitor-off.cjs` holds it off.
+- `config/quickshell/panels/dropbox` is Omarchy's Dropbox panel. `status.py` beside it reads
+  `~/.dropbox/info.json`, scans the Dropbox folder and asks `dropbox-cli`.
 - `config/quickshell/keystroke` is the launcher, from https://github.com/evindor/keystroke (v1.5.2,
   commit 0c74f2d), without its Omarchy menu, bar widget, Smart Match engine and paste helper. The
   same rule applies: patch at the seams (`core/ApplicationLibrary.qml`, `core/Hotkeys.js`,
@@ -72,6 +80,9 @@ Generated files — edit their source instead:
   setting back into `config/keystroke/keystroke.json` only when it should be the default.
 - `~/.config/bar/bar.json` is rewritten by the bar (a moved widget, a changed clock format). The
   same goes for `config/bar/bar.json`.
+- The display panel's text size (`bin/bar-display-text-size`) rewrites `base-size` in
+  `~/.config/quickshell/shell.toml` and `font-size` in `~/.config/ghostty/config`. Copy one back
+  only when it should be the default, and move the script's anchors (14px, 10pt) with it.
 
 Also keep secrets, tokens and host-specific paths out of the repo.
 
@@ -107,7 +118,7 @@ open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. After
 (`config/quickshell/keystroke`, `config/keystroke`), `tests/keystroke-test.sh`; after touching
 `Menu.qml` or a bind that opens it, `tests/menu-test.sh`; after touching the bar
 (`config/quickshell/{bar,panels,services}`, `BarHost.*`, `config/bar`, `bin/bar-*`,
-`bin/screenrecord`), `tests/bar-test.sh`. Say so plainly if something could not be
+`bin/screenrecord`, `config/hypr/monitor-settings.lua`), `tests/bar-test.sh`. Say so plainly if something could not be
 verified.
 
 ## Finishing

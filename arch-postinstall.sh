@@ -250,7 +250,7 @@ install_shell() {
   log "shell components"
   pac hyprlock hypridle hyprpaper hyprpolkitagent swayosd cliphist \
     grim slurp satty matugen quickshell python hunspell hunspell-en_us \
-    hyprsunset iw libnotify
+    hyprsunset iw libnotify ddcutil
   aur wlogout bibata-cursor-theme-bin
 }
 
@@ -296,7 +296,7 @@ install_dropbox() {
 
   # PKGBUILD verifies the Dropbox release signature
   gpg --keyserver keyserver.ubuntu.com --recv-keys "$DROPBOX_KEY"
-  aur dropbox nautilus-dropbox
+  aur dropbox nautilus-dropbox dropbox-cli
 }
 
 install_gaming() {

@@ -2,6 +2,7 @@
 -- monitors.lua and input.lua are written by arch-postinstall.sh
 require("env")
 require("monitors")
+require("monitor-settings")
 require("input")
 require("looknfeel")
 require("rules")

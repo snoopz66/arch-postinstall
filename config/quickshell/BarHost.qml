@@ -7,6 +7,8 @@ import qs.panels.agents as Agents
 import qs.panels.audio as Audio
 import qs.panels.bluetooth as Bluetooth
 import qs.panels.clock as Clock
+import qs.panels.dropbox as Dropbox
+import qs.panels.monitor as Monitor
 import qs.panels.network as Network
 import qs.panels.tailscale as Tailscale
 import qs.services.media as Media
@@ -85,7 +87,7 @@ Item {
     "power-menu": powerMenu, "workspaces": workspaces, "active-window": activeWindow, "tray": tray,
     "keyboard-layout": keyboardLayout, "indicators": indicators, "microphone": microphone, "spacer": spacer,
     "clock": clock, "media": mediaWidget, "audio": audio, "bluetooth": bluetooth, "network": network,
-    "tailscale": tailscale, "agents": agents
+    "tailscale": tailscale, "agents": agents, "monitor": monitor, "dropbox": dropbox
   })
   Component { id: powerMenu; PowerButton {} }
   Component { id: workspaces; Widgets.Workspaces {} }
@@ -102,6 +104,8 @@ Item {
   Component { id: network; Network.Panel {} }
   Component { id: tailscale; Tailscale.Panel {} }
   Component { id: agents; Agents.Panel {} }
+  Component { id: monitor; Monitor.Panel {} }
+  Component { id: dropbox; Dropbox.Panel {} }
 
   Bar.BarWidgetRegistry { id: registry }
 
