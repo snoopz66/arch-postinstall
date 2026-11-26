@@ -7,3 +7,10 @@ background       = "background"
 background-alpha = 0.8
 border           = "accent"
 border-alpha     = 0.9
+
+# the launcher (keystroke/)
+[menu]
+background       = "background"
+background-alpha = 0.8
+border           = "accent"
+border-alpha     = 0.9

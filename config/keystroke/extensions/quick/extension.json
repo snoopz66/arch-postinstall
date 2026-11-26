@@ -1,0 +1,10 @@
+{
+  "name": "Quick actions",
+  "version": "1.0.0",
+  "author": "arch-postinstall",
+  "description": "Wallpaper, screenshot, keybinds",
+  "apiVersion": 1,
+  "icon": "",
+  "color": "#98c379",
+  "license": "MIT"
+}

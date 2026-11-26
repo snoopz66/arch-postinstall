@@ -1,0 +1,16 @@
+{
+  "name": "Spell check",
+  "version": "1.0.0",
+  "author": "arch-postinstall",
+  "description": "Check a word's spelling with hunspell: sp recieve",
+  "apiVersion": 1,
+  "icon": "󰓆",
+  "color": "#e5c07b",
+  "license": "MIT",
+  "commands": [{
+    "id": "spell", "prefix": "sp", "title": "Spell check",
+    "summary": "The word if it is spelled right, its corrections if not; Enter copies",
+    "args": [{ "name": "word", "hint": "a word to check" }],
+    "examples": ["sp recieve", "sp definitely"]
+  }]
+}

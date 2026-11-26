@@ -3,19 +3,23 @@ local terminal = "ghostty"
 local files = "nautilus --new-window"
 local browser = "firefox"
 
--- bind(keys, dispatcher, description, opts): the description feeds the keybind list (quickshell/Menu.qml)
+-- Dispatchers by description, so the launcher can run a bind: hyprctl dispatch 'keybinds["Lock screen"]'
+keybinds = {}
+
+-- bind(keys, dispatcher, description, opts): the description names the bind in the launcher's
+-- keybind list. Two binds that share one must do the same thing.
 local function bind(keys, dispatcher, desc, opts)
   local o = {}
   for k, v in pairs(opts or {}) do
     o[k] = v
   end
   o.desc = desc
+  keybinds[desc] = dispatcher
   hl.bind(keys, dispatcher, o)
 end
 
 -- Shell
-bind(mod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"), "App launcher, calculator and spell checker")
-bind(mod .. " + ALT + SPACE", hl.dsp.exec_cmd("qs ipc call menu toggle quick"), "Quick menu: wallpaper, screenshot, keybinds")
+bind(mod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"), "Launcher: apps, files, calculator, keybinds")
 bind("ALT + TAB", hl.dsp.exec_cmd("qs ipc call menu toggle windows"), "Window switcher")
 bind(mod .. " + V", hl.dsp.exec_cmd("qs ipc call menu toggle clipboard"), "Clipboard history")
 bind(mod .. " + S", hl.dsp.exec_cmd("qs ipc call notifications showHistory"), "Recent notifications")
@@ -70,7 +74,7 @@ for i = 1, 10 do
   bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "Move window to workspace " .. i)
 end
 
-bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Previous workspace")
+bind(mod .. " + TAB", hl.dsp.focus({ workspace = "previous" }), "Last used workspace")
 bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "Next workspace")
 bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }), "Previous workspace")
 bind(mod .. " + grave", hl.dsp.workspace.toggle_special("scratch"), "Scratchpad")

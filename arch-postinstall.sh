@@ -249,7 +249,7 @@ EOF
 install_shell() {
   log "shell components"
   pac waybar hyprlock hypridle hyprpaper hyprpolkitagent swayosd cliphist \
-    grim slurp satty matugen blueman quickshell libqalculate hunspell hunspell-en_us
+    grim slurp satty matugen blueman quickshell python hunspell hunspell-en_us
   aur wlogout bibata-cursor-theme-bin
 }
 

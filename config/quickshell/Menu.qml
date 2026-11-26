@@ -1,6 +1,6 @@
-// List menus in the launcher's style without the sidebar: quick actions, window switcher, clipboard
-// history and the keybind list. Type to filter, Up/Down and Return pick, Escape closes.
-// Open with: qs ipc call menu toggle quick|windows|clipboard|keybinds
+// List menus: the window switcher and clipboard history. Type to filter, Up/Down and Return pick,
+// Escape closes.
+// Open with: qs ipc call menu toggle windows|clipboard
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -12,23 +12,21 @@ PanelWindow {
   id: menu
   visible: false
 
-  // same em as the launcher: 18px, text at 10pt
+  // 18px, text at 10pt
   readonly property int em: 18
   readonly property int fontSize: 13
 
-  // the list on show and its rows: { text, note, icon, glyph, run }, all but text optional
+  // the list on show and its rows: { text, note, icon, run }, all but text optional
   property string list: ""
   property var items: []
 
-  // per list: window width in em, rows before it scrolls, whether rows carry an icon, and for the
-  // lists that come from a command, the command and what turns its output into rows
+  // per list: window width in em, rows before it scrolls, whether rows carry an icon, the command
+  // that lists it and what turns its output into rows
   readonly property var lists: ({
-    quick: { width: 30, lines: 8, icons: true },
     windows: { width: 44, lines: 8, icons: true, command: ["hyprctl", "clients", "-j"], parse: windowRows },
     clipboard: { width: 44, lines: 12, icons: false, command: ["cliphist", "list"], parse: clipboardRows },
-    keybinds: { width: 44, lines: 18, icons: false, command: ["hyprctl", "binds", "-j"], parse: keybindRows },
   })
-  readonly property var shape: lists[list] ?? lists.quick
+  readonly property var shape: lists[list] ?? lists.windows
 
   readonly property int rowHeight: (shape.icons ? 1.6 : 1) * em + em // 0.5em padding above and below
   readonly property int rowSpacing: 0.2 * em
@@ -41,14 +39,6 @@ PanelWindow {
   WlrLayershell.namespace: "qs-menu"
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-  signal wallpaperPicker()
-
-  readonly property var quickRows: [
-    { glyph: "", text: "Wallpaper", run: () => menu.wallpaperPicker() },
-    { glyph: "", text: "Screenshot", run: () => Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/screenshot", "region"]) },
-    { glyph: "", text: "Keybinds", run: () => menu.open("keybinds") },
-  ]
 
   // most recently focused first, so the second row is the window to go back to
   function windowRows(json: string): var {
@@ -71,23 +61,11 @@ PanelWindow {
     }));
   }
 
-  // every Hyprland bind that has a description (hypr/binds.lua)
-  function keybindRows(json: string): var {
-    const mods = [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"]];
-    const names = { "mouse:272": "LMB", "mouse:273": "RMB", mouse_down: "scroll down", mouse_up: "scroll up" };
-    return JSON.parse(json).filter(b => b.has_description).map(b => ({
-      text: b.description,
-      note: mods.filter(m => b.modmask & m[0]).map(m => m[1])
-        .concat(names[b.key] ?? b.key.replace("XF86Audio", "")).join(" + "),
-    }));
-  }
-
-  // lists that come from a command show once it has answered, so the window opens at its final size
+  // a list shows once its command has answered, so the window opens at its final size
   function open(name: string): void {
     if (!lists[name]) return;
     list = name;
-    if (shape.command) source.exec(shape.command);
-    else present(quickRows);
+    source.exec(shape.command);
   }
   function present(rows: var): void {
     items = rows;
@@ -102,7 +80,6 @@ PanelWindow {
     else open(name);
   }
 
-  // hide first: the row's action may open another list
   function pick(row: var): void {
     visible = false;
     if (row && row.run) row.run();
@@ -209,7 +186,7 @@ PanelWindow {
           radius: 20
           color: selected ? Qt.alpha(Theme.colors.primary, 0.5) : "transparent" // select-bg
 
-          // the icon's column: an app icon or a font glyph, nothing on lists without icons
+          // the icon's column: an app icon, nothing on lists without icons
           Item {
             id: icon
             anchors { left: parent.left; verticalCenter: parent.verticalCenter }
@@ -222,14 +199,6 @@ PanelWindow {
               visible: row.modelData.icon !== undefined
               source: visible ? Quickshell.iconPath(row.modelData.icon, true) : ""
               asynchronous: true
-            }
-            Text {
-              anchors.centerIn: parent
-              visible: row.modelData.glyph !== undefined
-              text: row.modelData.glyph ?? ""
-              font.family: Theme.font
-              font.pixelSize: 1.1 * menu.em
-              color: row.fg
             }
           }
 
@@ -245,7 +214,7 @@ PanelWindow {
             maximumLineCount: 1
           }
 
-          // right-hand column: the workspace of a window, the keys of a bind
+          // right-hand column: the workspace of a window
           Text {
             id: note
             anchors { right: parent.right; verticalCenter: parent.verticalCenter }

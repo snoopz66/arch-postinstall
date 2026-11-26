@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "voice": {
+    "enabled": false
+  },
+  "providers": {
+    "ai": {
+      "enabled": false
+    },
+    "codex": {
+      "enabled": false
+    },
+    "dictation": {
+      "enabled": false
+    },
+    "windows": {
+      "enabled": true
+    },
+    "spellcheck": {
+      "enabled": true
+    },
+    "quick": {
+      "enabled": true
+    }
+  }
+}

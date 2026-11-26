@@ -1,14 +1,15 @@
 // Quickshell widgets, popups next to waybar. Docs: https://quickshell.org/docs/
 // Toggle from waybar or a keybind: qs ipc call audio toggle, launcher toggle, wallpapers toggle,
-// menu toggle quick|windows|clipboard|keybinds, notifications showHistory|toggleDnd|dismissAll|...
+// menu toggle windows|clipboard, notifications showHistory|toggleDnd|dismissAll|...
 import Quickshell
 import Quickshell.Io
+import qs.keystroke as Keystroke
 import qs.notifications as Notifications
 
 ShellRoot {
   AudioPanel { id: audio }
-  Launcher { id: launcher }
-  Menu { id: menu; onWallpaperPicker: wallpapers.open() }
+  Keystroke.Keystroke { id: launcher }
+  Menu { id: menu }
   WallpaperPicker { id: wallpapers }
 
   // the notification daemon; waybar's bell re-reads Do Not Disturb on signal 8
@@ -26,8 +27,8 @@ ShellRoot {
 
   IpcHandler {
     target: "launcher"
-    function toggle(): void { launcher.toggle(); }
-    function open(): void { launcher.open(); }
+    function toggle(): void { launcher.opened ? launcher.close() : launcher.open("{}"); }
+    function open(): void { launcher.open("{}"); }
     function close(): void { launcher.close(); }
   }
 

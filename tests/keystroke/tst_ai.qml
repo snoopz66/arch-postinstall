@@ -1,0 +1,140 @@
+import QtQuick
+import QtTest
+import "../../config/quickshell/keystroke/core/AiTargets.js" as Ai
+
+TestCase {
+    name: "AiTargets"
+    property var all: ({ "claude-desktop": true, "chatgpt": true, "claude": true, "codex": true, "cursor": true, "agent": true })
+
+    function test_links_carry_the_prompt() {
+        compare(Ai.claudeDesktopUrl("what is 2+2?"), "claude://claude.ai/new?q=what%20is%202%2B2%3F&surface=chat")
+        compare(Ai.codexDesktopUrl("fix the bug"), "codex://threads/new?prompt=fix%20the%20bug")
+        compare(Ai.claudeWebUrl("hi"), "https://claude.ai/new?q=hi")
+        compare(Ai.chatgptWebUrl("hi", false), "https://chatgpt.com/?prompt=hi")
+        compare(Ai.chatgptWebUrl("hi", true), "https://chatgpt.com/?q=hi")
+        compare(Ai.googleUrl("two words"), "https://www.google.com/search?q=two+words")
+    }
+    function test_slash_commands_are_padded_and_prompts_bounded() {
+        // Claude's URL validator refuses a q that starts with "/".
+        compare(Ai.claudeDesktopUrl("/clear"), "claude://claude.ai/new?q=%20%2Fclear&surface=chat")
+        var long = new Array(3000).join("a")
+        verify(decodeURIComponent(Ai.codexDesktopUrl(long).split("prompt=")[1]).length === Ai.MAX_PROMPT)
+    }
+    function test_desktop_mode_uses_the_apps_own_launchers() {
+        var c = Ai.plan("claude", "desktop", false, all, "hello")
+        compare(c.target, "claude-desktop")
+        compare(c.effect.type, "exec")
+        compare(c.effect.argv[0], "claude-desktop")
+        compare(c.effect.argv[1], "claude://claude.ai/new?q=hello&surface=chat")
+        var g = Ai.plan("chatgpt", "desktop", false, all, "hello")
+        compare(g.title, "Ask Codex")
+        compare(g.effect.argv, ["chatgpt", "codex://threads/new?prompt=hello"])
+    }
+    function test_missing_targets_fall_back_to_the_browser_and_say_so() {
+        var c = Ai.plan("claude", "desktop", false, {}, "hello")
+        compare(c.target, "claude-web")
+        compare(c.effect, { type: "url", url: "https://claude.ai/new?q=hello" })
+        verify(c.subtitle.indexOf("not installed") > 0)
+        var g = Ai.plan("chatgpt", "cli", true, {}, "hello")
+        compare(g.target, "chatgpt-web")
+        compare(g.effect.url, "https://chatgpt.com/?q=hello")
+        verify(g.subtitle.indexOf("sends your prompt") > 0)
+    }
+    function test_cli_mode_passes_the_prompt_as_a_literal_argument() {
+        var payload = "$(touch /tmp/no) `id` \"quoted\" --help"
+        var c = Ai.plan("claude", "cli", false, all, payload)
+        compare(c.effect.argv, ["ghostty", "-e", "claude", payload])
+        compare(Ai.plan("chatgpt", "cli", false, all, "x").effect.argv[2], "codex")
+    }
+    function test_leading_dash_never_reaches_a_cli_as_an_option() {
+        compare(Ai.plan("claude", "cli", false, all, "-p").effect.argv[3], " -p")
+        compare(Ai.plan("chatgpt", "cli", false, all, "--yolo").effect.argv[3], " --yolo")
+        compare(Ai.cursorPlan("cli", all, "--force", "").effect.argv[3], " --force")
+        compare(Ai.claudeWebUrl("-x"), "https://claude.ai/new?q=%20-x")
+    }
+    function test_scheme_handler_fallback_when_binary_missing() {
+        compare(Ai.openLink("claude-desktop", "claude://x", {}), { type: "url", url: "claude://x" })
+        compare(Ai.openLink("cursor", "cursor://x", {}, ["--open-url"]), { type: "url", url: "cursor://x" })
+        compare(Ai.openLink("cursor", "cursor://x", all, ["--open-url"]), { type: "exec", argv: ["cursor", "--open-url", "cursor://x"] })
+    }
+    function test_cursor_desktop_deeplink_carries_prompt_and_workspace() {
+        compare(Ai.cursorPromptUrl("fix tests", ""), "cursor://anysphere.cursor-deeplink/prompt?text=fix%20tests")
+        compare(Ai.cursorPromptUrl("hi", "/home/x/code"), "cursor://anysphere.cursor-deeplink/prompt?text=hi&workspace=%2Fhome%2Fx%2Fcode")
+        var d = Ai.cursorPlan("desktop", all, "hello", "")
+        compare(d.target, "cursor-desktop")
+        compare(d.effect.argv, ["cursor", "--open-url", "cursor://anysphere.cursor-deeplink/prompt?text=hello"])
+    }
+    function test_cursor_cli_passes_prompt_and_workspace_as_literal_argv() {
+        var payload = "explain $(rm -rf /)"
+        var c = Ai.cursorPlan("cli", all, payload, "/tmp/ws")
+        compare(c.effect.argv, ["ghostty", "-e", "agent", "--workspace", "/tmp/ws", payload])
+        var missing = Ai.cursorPlan("cli", { cursor: true }, "x", "")
+        compare(missing.target, "cursor-desktop")
+        verify(missing.subtitle.indexOf("CLI not installed") > 0)
+        compare(Ai.cursorPlan("browser", all, "x", "").subtitle, "Cursor · prompt ready in the composer · no browser hand-off")
+        compare(Ai.cursorPlan("desktop", { claude: true }, "x", ""), null)
+    }
+    function test_each_engine_has_its_own_url() {
+        compare(Ai.searchUrl("google", "rust lifetimes"), "https://www.google.com/search?q=rust+lifetimes")
+        compare(Ai.searchUrl("duckduckgo", "rust lifetimes"), "https://duckduckgo.com/?q=rust+lifetimes")
+        compare(Ai.searchUrl("brave", "rust lifetimes"), "https://search.brave.com/search?q=rust+lifetimes")
+        compare(Ai.searchUrl("bing", "rust lifetimes"), "https://www.bing.com/search?q=rust+lifetimes")
+        compare(Ai.searchUrl("startpage", "rust lifetimes"), "https://www.startpage.com/sp/search?query=rust+lifetimes")
+        compare(Ai.searchUrl("yahoo", "x"), "https://www.google.com/search?q=x")
+        compare(Ai.searchUrl(undefined, "x"), "https://www.google.com/search?q=x")
+    }
+    function test_search_text_cannot_add_parameters() {
+        compare(Ai.searchUrl("google", "a & b"), "https://www.google.com/search?q=a+%26+b")
+        compare(Ai.searchUrl("duckduckgo", "a+b#c?d=e/f"), "https://duckduckgo.com/?q=a%2Bb%23c%3Fd%3De%2Ff")
+        compare(Ai.searchUrl("google", "héllo"), "https://www.google.com/search?q=h%C3%A9llo")
+    }
+    function test_engine_labels_cover_every_option() {
+        compare(Ai.ENGINE_IDS, Object.keys(Ai.ENGINES))
+        compare(Ai.ENGINE_LABELS.duckduckgo, "DuckDuckGo")
+        for (var i = 0; i < Ai.ENGINE_IDS.length; i++) verify(Ai.ENGINE_LABELS[Ai.ENGINE_IDS[i]].length > 0)
+    }
+    function test_the_fallback_search_follows_the_engine_setting() {
+        var row = Ai.rows({ searchEngine: "duckduckgo" }, all, "a b")[0]
+        compare(row.id, "search")
+        compare(row.title, "Search DuckDuckGo")
+        compare(row.tier, "fallback")
+        compare(row.section, "Continue with")
+        compare(row.action.url, "https://duckduckgo.com/?q=a+b")
+        compare(row.altAction, { type: "copy", text: row.action.url })
+        compare(Ai.rows({}, all, "x")[0].title, "Search Google")
+        compare(Ai.rows({ searchEngine: "nonsense" }, all, "x")[0].action.url, "https://www.google.com/search?q=x")
+    }
+    function test_the_search_command_is_one_answer_or_nothing() {
+        var rows = Ai.commandRows({ searchEngine: "brave" }, "  how to center a div ")
+        compare(rows.length, 1)
+        compare(rows[0].title, "Search Brave")
+        compare(rows[0].subtitle, "how to center a div")
+        compare(rows[0].tier, "answer")
+        compare(rows[0].action.url, "https://search.brave.com/search?q=how+to+center+a+div")
+        compare(rows[0].altVerb, "Copy URL")
+        compare(Ai.commandRows({}, ""), [])
+        compare(Ai.commandRows({}, "   "), [])
+        compare(Ai.commandRows({}, undefined), [])
+    }
+    function ids(rows) { return rows.map(function(r) { return r.id }) }
+    function test_rows_list_every_assistant_with_the_preferred_one_first() {
+        compare(ids(Ai.rows({ provider: "cursor", mode: "cli" }, all, "hi")), ["search", "cursor", "chatgpt", "claude"])
+        compare(ids(Ai.rows({ provider: "claude", mode: "desktop" }, all, "hi")), ["search", "claude", "chatgpt", "cursor"])
+        compare(ids(Ai.rows({}, all, "hi")), ["search", "chatgpt", "claude", "cursor"])
+        compare(ids(Ai.rows({ provider: "nonsense" }, all, "hi")), ["search", "chatgpt", "claude", "cursor"])
+        var rows = Ai.rows({ provider: "cursor", mode: "cli", cursorWorkspace: "/w" }, all, "hi")
+        compare(rows[1].action.argv, ["ghostty", "-e", "agent", "--workspace", "/w", "hi"])
+        compare(rows[1].preview, "hi")
+        for (var i = 1; i < rows.length; i++) {
+            verify(rows[i].score > rows[0].score, rows[i].id + " ranks above the web search")
+            verify(i === 1 || rows[i].score < rows[i - 1].score, rows[i].id + " keeps its place")
+            verify(rows[i].icon.length > 0)
+        }
+    }
+    function test_rows_keep_the_web_fallbacks_when_cursor_is_preferred_but_absent() {
+        var rows = Ai.rows({ provider: "cursor", mode: "desktop" }, { "claude-desktop": true }, "hi")
+        compare(ids(rows), ["search", "chatgpt", "claude"])
+        compare(rows[1].action.url, "https://chatgpt.com/?prompt=hi")
+        compare(rows[2].action.argv[0], "claude-desktop")
+    }
+}

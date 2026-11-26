@@ -36,6 +36,11 @@ So beyond config files:
 - Changed behaviour a user would notice (new keybind, new script, new toggle) → update `README.md`.
 - `config/quickshell/{Commons,Ui,notifications,i18n}` come from Omarchy (`LICENSE.omarchy` names
   the commit). Keep local changes there small, so upstream fixes can still be diffed in.
+- `config/quickshell/keystroke` is the launcher, from https://github.com/evindor/keystroke (v1.5.2,
+  commit 0c74f2d), without its Omarchy menu, bar widget, Smart Match engine and paste helper. The
+  same rule applies: patch at the seams (`core/ApplicationLibrary.qml`, `core/Hotkeys.js`,
+  `core/Cliphist.js`, `core/Terminal.js`), switch features off in `config/keystroke/keystroke.json`
+  rather than cutting them out, and put new providers in `config/keystroke/extensions/`.
 
 ## Do not copy these into the repo
 
@@ -50,6 +55,8 @@ Generated files — edit their source instead:
   `KB_OPTIONS`. Change the template there if the *shape* must change; never commit this machine's
   values.
 - `/var/lib/greeter/*` — mirrored from the session by `bin/greeter-sync`.
+- `~/.config/keystroke/keystroke.json` is written by the launcher's settings screen. Copy a
+  setting back into `config/keystroke/keystroke.json` only when it should be the default.
 
 Also keep secrets, tokens and host-specific paths out of the repo.
 
@@ -58,13 +65,13 @@ Also keep secrets, tokens and host-specific paths out of the repo.
 Prefer editing the repo file first, then copying it to the live location:
 
 ```
-cp config/quickshell/Launcher.qml ~/.config/quickshell/Launcher.qml
+cp config/quickshell/Menu.qml ~/.config/quickshell/Menu.qml
 ```
 
 Before overwriting a live file, check it has no local edits that the repo lacks:
 
 ```
-git show HEAD:config/quickshell/Launcher.qml | diff - ~/.config/quickshell/Launcher.qml
+git show HEAD:config/quickshell/Menu.qml | diff - ~/.config/quickshell/Menu.qml
 ```
 
 If they differ, the live file has drifted — merge the difference into the repo rather than
@@ -81,8 +88,10 @@ The install script copies with `--update=none` (existing user files win), so re-
 Check the change in the running session where practical: `hyprctl reload` and `hyprctl configerrors`
 for Hyprland, restart the component for waybar. Quickshell reloads when its files change:
 open the menu (`qs ipc call launcher open`) and screenshot it with `grim`. After touching
-`config/quickshell/notifications`, run `tests/notifications-test.sh`. Say so plainly if
-something could not be verified.
+`config/quickshell/notifications`, run `tests/notifications-test.sh`; after touching the launcher
+(`config/quickshell/keystroke`, `config/keystroke`), `tests/keystroke-test.sh`; after touching
+`Menu.qml` or a bind that opens it, `tests/menu-test.sh`. Say so plainly if something could not be
+verified.
 
 ## Finishing
 

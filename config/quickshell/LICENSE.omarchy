@@ -1,4 +1,4 @@
-Commons/, Ui/, notifications/ and i18n/ come from Omarchy
+Commons/, Ui/, notifications/, i18n/ and keystroke/data/emojis.json come from Omarchy
 (https://github.com/omacom/omarchy, branch quattro, commit b6f920a), adapted
 to this shell. The notification engine began as Omapager
 (https://github.com/omacom/omapager), Copyright (c) 2026 Neil Jagdish Patel,
