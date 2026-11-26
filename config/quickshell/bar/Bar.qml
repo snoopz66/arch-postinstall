@@ -56,6 +56,14 @@ Item {
   // A see-through bar that Hyprland blurs behind (the bar-glassy toggle), so
   // its theme background stays faintly. A transparent bar wins over it.
   property bool glassy: false
+  // Nothing behind the bar but a pill behind each of its three groups (left,
+  // center, right), which Hyprland blurs behind like the rest.
+  property bool pills: false
+  // A pill's gap to the bar's edges, and how far it reaches past its group.
+  readonly property real pillInset: Style.space(4)
+  readonly property real pillPad: Style.space(10)
+  // How far the outer groups keep from the ends of the bar.
+  readonly property real sectionMargin: Style.space(8) + (pills ? pillPad : 0)
   property int barConfigSerial: 0
   property string position: "top"
   // Resolves through fontconfig at paint time (Style.font.family defaults
@@ -72,6 +80,9 @@ Item {
   property bool foregroundAnimationEnabled: true
   property color background: Commons.Color.bar.background
   readonly property color glassBackground: Qt.rgba(background.r, background.g, background.b, Math.min(background.a, 0.35))
+  // Behind the pills the bar keeps a trace of its background: Hyprland blurs
+  // only behind what a layer paints (hypr/rules.lua).
+  readonly property color frostBackground: Qt.rgba(background.r, background.g, background.b, 0.01)
   property color urgent: Commons.Color.bar.active
 
   // A theme change cross-fades the bar's colors. Cycling the background
@@ -774,9 +785,10 @@ Item {
     var config = Util.isPlainObject(barConfig) ? barConfig : fallbackBarConfig
 
     position = normalizePosition(config.position)
-    // opaque, glassy or none; a config from before background says
+    // opaque, glassy, pills or none; a config from before background says
     // transparent instead.
     var look = config.background || (config.transparent === true ? "none" : "opaque")
+    pills = look === "pills"
     setRequestedTransparency(look === "none")
     // A bar going clear waits for its text color before dropping its
     // background, so a glassy one stays glassy until then rather than
@@ -989,12 +1001,12 @@ Item {
     Util.execDetached(command)
   }
 
-  // Steps the bar background from clear to glassy to opaque and around.
+  // Steps the bar background from clear to glassy to opaque to pills and around.
   // Hyprland blurs behind whatever the bar paints (hypr/rules.lua).
   function cycleBackground() {
     if (!root.shell) return
-    var looks = ["none", "glassy", "opaque"]
-    var look = requestedTransparent ? "none" : (glassy ? "glassy" : "opaque")
+    var looks = ["none", "glassy", "opaque", "pills"]
+    var look = requestedTransparent ? "none" : (pills ? "pills" : (glassy ? "glassy" : "opaque"))
     var next = looks[(looks.indexOf(look) + 1) % looks.length]
     root.shell.mutateShellConfig(function(config) {
       if (!Util.isPlainObject(config.bar)) config.bar = {}
@@ -1838,7 +1850,7 @@ Item {
 
       Rectangle {
         anchors.fill: parent
-        color: root.transparent ? "transparent" : (root.glassy ? root.glassBackground : root.background)
+        color: root.transparent ? "transparent" : (root.pills ? root.frostBackground : (root.glassy ? root.glassBackground : root.background))
       }
 
       Loader {
@@ -1931,6 +1943,9 @@ Item {
 
         WidgetPool { id: horizontalPool }
 
+        SectionPill { start: leftModules.x; length: leftModules.width }
+        SectionPill { start: rightModules.x; length: rightModules.width }
+
         CenterModules {
           anchors.fill: parent
           window: barWindow
@@ -1939,10 +1954,11 @@ Item {
         }
 
         LeftModules {
+          id: leftModules
           window: barWindow
           pool: horizontalPool
           anchors.left: parent.left
-          anchors.leftMargin: Style.space(8)
+          anchors.leftMargin: root.sectionMargin
           anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -1951,7 +1967,7 @@ Item {
           pool: horizontalPool
           id: rightModules
           anchors.right: parent.right
-          anchors.rightMargin: Style.space(8)
+          anchors.rightMargin: root.sectionMargin
           anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -1966,7 +1982,7 @@ Item {
           active: barWindow.centerBesideRight
           besideRight: true
           anchors.right: rightModules.left
-          anchors.rightMargin: Style.space(4)
+          anchors.rightMargin: Style.space(4) + (root.pills ? 2 * root.pillPad : 0)
           anchors.top: parent.top
           anchors.bottom: parent.bottom
         }
@@ -1981,6 +1997,9 @@ Item {
 
         WidgetPool { id: verticalPool }
 
+        SectionPill { start: leftModules.y; length: leftModules.height }
+        SectionPill { start: rightModules.y; length: rightModules.height }
+
         CenterModules {
           anchors.fill: parent
           window: barWindow
@@ -1988,18 +2007,20 @@ Item {
         }
 
         LeftModules {
+          id: leftModules
           window: barWindow
           pool: verticalPool
           anchors.top: parent.top
-          anchors.topMargin: Style.space(8)
+          anchors.topMargin: root.sectionMargin
           anchors.horizontalCenter: parent.horizontalCenter
         }
 
         RightModules {
+          id: rightModules
           window: barWindow
           pool: verticalPool
           anchors.bottom: parent.bottom
-          anchors.bottomMargin: Style.space(8)
+          anchors.bottomMargin: root.sectionMargin
           anchors.horizontalCenter: parent.horizontalCenter
         }
       }
@@ -2257,6 +2278,22 @@ Item {
     }
   }
 
+  // The pill behind one of the bar's three groups, under the pills background:
+  // as long as the group and a little more, and nothing while the group is empty.
+  component SectionPill: Rectangle {
+    // Where the group starts along the bar, and how far it runs.
+    property real start: 0
+    property real length: 0
+
+    visible: root.pills && length > 0
+    x: root.vertical ? root.pillInset : start - root.pillPad
+    y: root.vertical ? start - root.pillPad : root.pillInset
+    width: root.vertical ? parent.width - 2 * root.pillInset : length + 2 * root.pillPad
+    height: root.vertical ? length + 2 * root.pillPad : parent.height - 2 * root.pillInset
+    radius: Math.min(width, height) / 2
+    color: root.background
+  }
+
   component LeftModules: ModuleList {
     keys: root.layoutWidgets.sections.left
     region: "left"
@@ -2307,6 +2344,12 @@ Item {
 
     implicitWidth: root.vertical ? root.barSize : beginList.width + centerBox.width + endList.width
     implicitHeight: root.vertical ? beginList.height + centerBox.height + endList.height : root.barSize
+
+    // One pill for the three center sections, which run on as one group.
+    SectionPill {
+      start: root.vertical ? beginList.y : beginList.x
+      length: root.vertical ? endList.y + endList.height - beginList.y : endList.x + endList.width - beginList.x
+    }
 
     ModuleList {
       id: beginList
@@ -2994,7 +3037,8 @@ Item {
       Rectangle {
         id: openPanelIndicator
 
-        readonly property int inset: Style.space(2)
+        // Inside the pill, under the pills background.
+        readonly property int inset: Style.space(2) + (root.pills ? root.pillInset : 0)
 
         visible: opacity > 0
         opacity: slot.panelOpen && !slot.dragSource ? 0.9 : 0

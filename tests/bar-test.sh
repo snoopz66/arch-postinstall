@@ -36,6 +36,9 @@ if command -v node >/dev/null; then
   done
   echo "ok - the models pass upstream's tests"
 
+  node "$root/tests/bar/looks.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the bar's looks cycle, and the default layout asks for one of them"; }
+  echo "ok - the bar's looks cycle, and the default layout asks for one of them"
+
   node "$root/tests/bar/agents-off.cjs" >"$log" 2>&1 || { cat "$log" >&2; fail "the agents panel's Omarchy-only parts are off"; }
   echo "ok - the agents panel's Omarchy-only parts are off"
 else

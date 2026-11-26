@@ -21,3 +21,15 @@ background       = "background"
 background-alpha = 0.8
 border           = "accent"
 border-alpha     = 0.9
+
+# One type scale for the whole kit: the bar, its panels, notifications, the launcher.
+[font]
+base-size = 14
+
+# the bar (bar/), and its pills under "background": "pills" in ~/.config/bar/bar.json.
+# Sizes are given for base-size 12 and grow with it: 31 is 36px at 14.
+[bar]
+background       = "background"
+background-alpha = 0.8
+size-horizontal  = 31
+size-vertical    = 33
